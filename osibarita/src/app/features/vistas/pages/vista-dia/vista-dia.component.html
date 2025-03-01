@@ -1,0 +1,42 @@
+<!-- src/app/features/vistas/pages/vista-dia/vista-dia.component.html -->
+<div class="w-full h-full bg-black text-white p-8 overflow-auto">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-montserrat font-bold text-restaurant-gold-500">Menú del Día</h1>
+        <div class="h-1 w-32 bg-restaurant-gold-500 mx-auto mt-2"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Menú del día -->
+        <app-restaurant-card title="Menú del Día">
+          <div *ngIf="primeros.length > 0" class="mb-6">
+            <h4 class="text-xl text-restaurant-gold-400 mb-3">Primeros</h4>
+            <app-menu-item-card *ngFor="let item of primeros" [item]="item"></app-menu-item-card>
+          </div>
+          
+          <div *ngIf="segundos.length > 0" class="mb-6">
+            <h4 class="text-xl text-restaurant-gold-400 mb-3">Segundos</h4>
+            <app-menu-item-card *ngFor="let item of segundos" [item]="item"></app-menu-item-card>
+          </div>
+          
+          <div *ngIf="postres.length > 0">
+            <h4 class="text-xl text-restaurant-gold-400 mb-3">Postres</h4>
+            <app-menu-item-card *ngFor="let item of postres" [item]="item"></app-menu-item-card>
+          </div>
+        </app-restaurant-card>
+        
+        <!-- Tapas y Raciones -->
+        <div class="space-y-8">
+          <!-- Tapas -->
+          <app-restaurant-card title="Tapas">
+            <app-menu-item-card *ngFor="let tapa of (tapas$ | async)" [item]="tapa"></app-menu-item-card>
+          </app-restaurant-card>
+          
+          <!-- Raciones -->
+          <app-restaurant-card title="Raciones">
+            <app-menu-item-card *ngFor="let racion of (raciones$ | async)" [item]="racion"></app-menu-item-card>
+          </app-restaurant-card>
+        </div>
+      </div>
+    </div>
+  </div>

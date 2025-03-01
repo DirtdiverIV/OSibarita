@@ -1,0 +1,12 @@
+<!-- src/app/features/vistas/pages/tv-layout/tv-layout.component.html -->
+<div class="w-full h-screen bg-black overflow-hidden relative">
+    <!-- Contenido de la vista actual -->
+    <div class="h-full">
+      <router-outlet></router-outlet>
+    </div>
+    
+    <!-- Indicador de ID de TV -->
+    <div class="absolute bottom-2 right-2 text-xs text-gray-600">
+      {{ tvId }}
+    </div>
+  </div>

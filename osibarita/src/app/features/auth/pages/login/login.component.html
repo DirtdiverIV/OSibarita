@@ -1,0 +1,64 @@
+<!-- src/app/features/auth/pages/login/login.component.html -->
+<div class="min-h-screen flex items-center justify-center bg-black p-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-montserrat font-bold text-restaurant-gold-500">Panel de Administración</h1>
+      <div class="h-1 w-32 bg-restaurant-gold-500 mx-auto mt-2"></div>
+    </div>
+    
+    <app-restaurant-card>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <h2 class="text-xl font-bold text-white mb-6">Iniciar Sesión</h2>
+        
+        <div *ngIf="error" class="bg-red-900 text-white p-3 rounded-md mb-4">
+          {{ error }}
+        </div>
+        
+        <div>
+          <label for="email" class="block text-restaurant-gold-500 text-sm font-bold mb-2">
+            Email
+          </label>
+          <input 
+            id="email"
+            type="email"
+            formControlName="email"
+            class="w-full px-3 py-2 bg-gray-900 border border-gray-700 focus:border-restaurant-gold-500 focus:outline-none rounded-md text-white"
+            [ngClass]="{'border-red-500': f['email'].invalid && f['email'].touched}"
+          >
+          <div *ngIf="f['email'].invalid && f['email'].touched" class="text-red-500 text-xs mt-1">
+            <span *ngIf="f['email'].errors?.['required']">El email es obligatorio</span>
+            <span *ngIf="f['email'].errors?.['email']">Ingrese un email válido</span>
+          </div>
+        </div>
+        
+        <div>
+          <label for="password" class="block text-restaurant-gold-500 text-sm font-bold mb-2">
+            Contraseña
+          </label>
+          <input 
+            id="password"
+            type="password"
+            formControlName="password"
+            class="w-full px-3 py-2 bg-gray-900 border border-gray-700 focus:border-restaurant-gold-500 focus:outline-none rounded-md text-white"
+            [ngClass]="{'border-red-500': f['password'].invalid && f['password'].touched}"
+          >
+          <div *ngIf="f['password'].invalid && f['password'].touched" class="text-red-500 text-xs mt-1">
+            <span *ngIf="f['password'].errors?.['required']">La contraseña es obligatoria</span>
+          </div>
+        </div>
+        
+        <div>
+          <app-gold-button 
+            label="Iniciar Sesión" 
+            type="submit"
+            [disabled]="loginForm.invalid || loading">
+          </app-gold-button>
+          
+          <div *ngIf="loading" class="mt-4 text-sm text-gray-400">
+            Iniciando sesión...
+          </div>
+        </div>
+      </form>
+    </app-restaurant-card>
+  </div>
+</div>

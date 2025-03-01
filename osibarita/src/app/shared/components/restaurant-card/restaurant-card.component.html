@@ -1,0 +1,8 @@
+<!-- src/app/shared/components/restaurant-card/restaurant-card.component.html -->
+<div class="bg-black border border-restaurant-gold-500 rounded-lg shadow-lg overflow-hidden">
+  <div class="bg-gradient-to-r from-restaurant-gold-600 to-restaurant-gold-500 h-1"></div>
+  <div class="p-6">
+    <h3 *ngIf="title" class="text-xl font-montserrat font-bold text-restaurant-gold-500 mb-4">{{ title }}</h3>
+    <ng-content></ng-content>
+  </div>
+</div>
