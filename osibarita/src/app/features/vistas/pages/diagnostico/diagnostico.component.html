@@ -1,0 +1,85 @@
+<!-- src/app/features/vistas/pages/diagnostico/diagnostico.component.html -->
+<div class="w-full h-full bg-restaurant-black text-white p-8 overflow-auto">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gold-gradient mb-6">Diagnóstico de Firebase</h1>
+  
+      <div *ngIf="loading" class="py-4">
+        <div class="bg-restaurant-gold-900/20 animate-pulse p-4 rounded">Cargando...</div>
+      </div>
+  
+      <div *ngIf="errorMessage" class="bg-red-900/50 p-4 rounded mb-4">
+        <p class="text-red-200">{{ errorMessage }}</p>
+      </div>
+  
+      <!-- Estado de conexión -->
+      <div class="bg-restaurant-dark border border-gray-800 rounded-lg p-6 mb-6">
+        <h2 class="text-xl mb-4 text-restaurant-gold-400">Estado de la conexión</h2>
+        <div class="flex items-center">
+          <div class="w-4 h-4 rounded-full mr-2" 
+               [ngClass]="connectionStatus ? 'bg-green-500' : 'bg-red-500'"></div>
+          <span>{{ connectionStatus ? 'Conectado a Firebase' : 'Error de conexión a Firebase' }}</span>
+        </div>
+        <button 
+          (click)="testConnection()" 
+          class="mt-4 px-4 py-2 bg-restaurant-gold-800 text-white rounded hover:bg-restaurant-gold-700 transition-colors">
+          Probar Conexión
+        </button>
+      </div>
+  
+      <!-- Colecciones -->
+      <div class="bg-restaurant-dark border border-gray-800 rounded-lg p-6 mb-6" *ngIf="collectionsData">
+        <h2 class="text-xl mb-4 text-restaurant-gold-400">Colecciones Encontradas</h2>
+        
+        <ul class="list-disc pl-5 mb-4">
+          <li *ngFor="let coleccion of collectionsData.colecciones">{{ coleccion }}</li>
+        </ul>
+  
+        <div *ngIf="collectionsData.colecciones.length === 0" class="text-red-400">
+          No se encontraron colecciones
+        </div>
+  
+        <!-- Detalles de las colecciones -->
+        <div *ngIf="collectionsData.detalles.vistas" class="mt-4">
+          <h3 class="text-lg text-restaurant-gold-300 mb-2">Vistas</h3>
+          <pre class="bg-gray-900 p-3 rounded text-xs overflow-auto max-h-40">{{ collectionsData.detalles.vistas | json }}</pre>
+        </div>
+  
+        <div *ngIf="collectionsData.detalles.tapas" class="mt-4">
+          <h3 class="text-lg text-restaurant-gold-300 mb-2">Tapas</h3>
+          <pre class="bg-gray-900 p-3 rounded text-xs overflow-auto max-h-40">{{ collectionsData.detalles.tapas | json }}</pre>
+        </div>
+  
+        <div *ngIf="collectionsData.detalles.raciones" class="mt-4">
+          <h3 class="text-lg text-restaurant-gold-300 mb-2">Raciones</h3>
+          <pre class="bg-gray-900 p-3 rounded text-xs overflow-auto max-h-40">{{ collectionsData.detalles.raciones | json }}</pre>
+        </div>
+  
+        <div *ngIf="collectionsData.detalles.menu" class="mt-4">
+          <h3 class="text-lg text-restaurant-gold-300 mb-2">Menú</h3>
+          <pre class="bg-gray-900 p-3 rounded text-xs overflow-auto max-h-40">{{ collectionsData.detalles.menu | json }}</pre>
+        </div>
+  
+        <div *ngIf="collectionsData.detalles.configuracion" class="mt-4">
+          <h3 class="text-lg text-restaurant-gold-300 mb-2">Configuración</h3>
+          <pre class="bg-gray-900 p-3 rounded text-xs overflow-auto max-h-40">{{ collectionsData.detalles.configuracion | json }}</pre>
+        </div>
+      </div>
+  
+      <!-- Inicializar datos mock -->
+      <div class="bg-restaurant-dark border border-gray-800 rounded-lg p-6">
+        <h2 class="text-xl mb-4 text-restaurant-gold-400">Datos Mock</h2>
+        <p class="mb-4" *ngIf="!mockDataInitialized">
+          Si no ves datos en las colecciones, puedes inicializar los datos mock manualmente.
+        </p>
+        <p class="mb-4 text-green-400" *ngIf="mockDataInitialized">
+          ¡Datos mock inicializados correctamente!
+        </p>
+        <button 
+          (click)="initializeMockData()" 
+          [disabled]="loading"
+          class="px-4 py-2 bg-restaurant-gold-800 text-white rounded hover:bg-restaurant-gold-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          Inicializar Datos Mock
+        </button>
+      </div>
+    </div>
+  </div>

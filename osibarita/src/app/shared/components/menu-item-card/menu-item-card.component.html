@@ -1,10 +1,16 @@
 <!-- src/app/shared/components/menu-item-card/menu-item-card.component.html -->
-<div class="p-4 border-b border-gray-800 hover:bg-gray-900 transition-colors">
-  <div class="flex justify-between items-start">
-    <div>
-      <h3 class="text-lg font-medium text-white">{{ item.name }}</h3>
-      <p class="text-sm text-gray-400">{{ item.description }}</p>
+<div class="p-4 border-b border-gray-800/50 hover:bg-restaurant-gold-900/10 transition-all duration-300 group relative overflow-hidden">
+  <!-- Línea decorativa que aparece al hacer hover -->
+  <div class="absolute left-0 top-0 w-1 h-0 bg-gold-gradient group-hover:h-full transition-all duration-300"></div>
+  
+  <div class="flex justify-between items-start pl-2">
+    <div class="flex-1">
+      <h3 class="text-lg font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">{{ item.name }}</h3>
+      <p class="text-sm text-gray-400 mt-1">{{ item.description }}</p>
     </div>
-    <div class="text-restaurant-gold-500 font-bold">{{ item.price }}€</div>
+    <!-- Precio con efecto de brillo -->
+    <div class="text-transparent bg-clip-text bg-gold-gradient font-bold text-lg flex items-center">
+      {{ item.price | number:'1.2-2' }}€
+    </div>
   </div>
 </div>

@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { FirestoreService } from './firestore.service';
 import { Vista, ConfiguracionTV, MenuItem, Escena } from '../../models';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +13,14 @@ export class VistasService {
 
   // Obtener todas las vistas
   getVistas(): Observable<Vista[]> {
-    return this.firestoreService.getCollection<Vista>('vistas');
+    return this.firestoreService.getCollection<Vista>('vistas')
+      .pipe(tap(vistas => console.log('Vistas cargadas:', vistas)));
   }
 
   // Obtener configuración de una TV específica
   getConfiguracionTV(tvId: string): Observable<ConfiguracionTV> {
-    return this.firestoreService.getDocObservable<ConfiguracionTV>('configuracion', tvId);
+    return this.firestoreService.getDocObservable<ConfiguracionTV>('configuracion', tvId)
+      .pipe(tap(config => console.log(`Configuración para ${tvId}:`, config)));
   }
 
   // Actualizar configuración de una TV
@@ -32,17 +34,20 @@ export class VistasService {
 
   // Obtener tapas del día
   getTapas(): Observable<MenuItem[]> {
-    return this.firestoreService.getCollection<MenuItem>('vistas/dia/tapas');
+    return this.firestoreService.getCollection<MenuItem>('vistas/dia/tapas')
+      .pipe(tap(tapas => console.log('Tapas cargadas:', tapas)));
   }
 
   // Obtener raciones del día
   getRaciones(): Observable<MenuItem[]> {
-    return this.firestoreService.getCollection<MenuItem>('vistas/dia/raciones');
+    return this.firestoreService.getCollection<MenuItem>('vistas/dia/raciones')
+      .pipe(tap(raciones => console.log('Raciones cargadas:', raciones)));
   }
 
   // Obtener menú del día
   getMenuDia(): Observable<MenuItem[]> {
-    return this.firestoreService.getCollection<MenuItem>('vistas/dia/menu');
+    return this.firestoreService.getCollection<MenuItem>('vistas/dia/menu')
+      .pipe(tap(menu => console.log('Menú cargado:', menu)));
   }
 
   // Obtener escenas de eventos
@@ -92,5 +97,4 @@ export class VistasService {
       await this.updateEscena(tipo, escena.id!, { orden: i + 1 });
     }
   }
-
 }

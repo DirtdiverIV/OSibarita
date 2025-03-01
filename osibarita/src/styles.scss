@@ -6,6 +6,25 @@
 /* Importar fuente Montserrat desde Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
 
+/* Gradientes personalizados avanzados */
+@layer utilities {
+  .bg-gradient-radial {
+    background-image: radial-gradient(var(--tw-gradient-stops));
+  }
+  
+  .gold-text-shadow {
+    text-shadow: 0 0 10px rgba(212, 178, 84, 0.4);
+  }
+  
+  .bg-gold-gradient {
+    background-image: linear-gradient(135deg, #D4B254 0%, #8A6E1E 100%);
+  }
+  
+  .bg-card-gradient {
+    background-image: linear-gradient(to bottom, rgba(18, 18, 18, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%);
+  }
+}
+
 /* Estilos globales */
 html, body {
   height: 100%;
@@ -15,9 +34,33 @@ html, body {
   color: white;
 }
 
+/* Animaciones de brillo para elementos dorados */
+.gold-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px rgba(212, 178, 84, 0.5);
+  }
+  to {
+    box-shadow: 0 0 15px rgba(212, 178, 84, 0.8);
+  }
+}
+
+/* Efectos de transición */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Scroll personalizado */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -25,10 +68,10 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D4AF37;
+  background: linear-gradient(to bottom, #D4B254, #8A6E1E);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8860B;
+  background: linear-gradient(to bottom, #C09E45, #74591A);
 }
