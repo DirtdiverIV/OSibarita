@@ -8,12 +8,20 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { GestionVistasComponent } from './pages/gestion-vistas/gestion-vistas.component';
 import { ConfiguracionComponent } from './pages/configuracion/configuracion.component';
 import { SharedModule } from '../../shared/shared.module';
+import { MenuDiaEditorComponent } from './components/menu-dia-editor/menu-dia-editor.component';
+import { EventosEditorComponent } from './components/eventos-editor/eventos-editor.component';
+import { CartaEditorComponent } from './components/carta-editor/carta-editor.component';
+
 
 @NgModule({
   declarations: [
     DashboardComponent,
     GestionVistasComponent,
-    ConfiguracionComponent
+    ConfiguracionComponent,
+    MenuDiaEditorComponent,
+    EventosEditorComponent,
+    CartaEditorComponent
+    
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,344 @@
+<!-- src/app/features/admin/components/carta-editor/carta-editor.component.html -->
+<div class="w-full">
+    <!-- Mensajes -->
+    <div *ngIf="successMessage" class="mb-4 p-4 bg-green-900/50 border border-green-800 text-green-300 rounded-md">
+      {{ successMessage }}
+    </div>
+    
+    <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-900/50 border border-red-800 text-red-300 rounded-md">
+      {{ errorMessage }}
+    </div>
+    
+    <!-- Botón para añadir nueva sección -->
+    <div *ngIf="!editingEscena" class="mb-6">
+      <button 
+        (click)="cancelEdit()"
+        class="px-4 py-2 bg-restaurant-gold-900/30 text-restaurant-gold-400 rounded-md hover:bg-restaurant-gold-900/50 transition-colors border border-restaurant-gold-800/50">
+        <span class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          Añadir nueva sección
+        </span>
+      </button>
+    </div>
+    
+    <!-- Formulario para editar/añadir sección y sus platos -->
+    <div *ngIf="editingEscena || escenaForm.dirty" class="mb-6 bg-restaurant-black border border-restaurant-gold-800/30 p-6 rounded-lg">
+      <h3 class="text-xl font-semibold text-restaurant-gold-400 mb-4">
+        {{ editingEscena ? 'Editar sección de carta' : 'Añadir nueva sección de carta' }}
+      </h3>
+      
+      <form [formGroup]="escenaForm" class="space-y-6">
+        <!-- Campos principales de la sección -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Título -->
+          <div>
+            <label for="escena-titulo" class="block text-sm font-medium text-gray-400 mb-1">
+              Título de la sección
+            </label>
+            <input 
+              id="escena-titulo" 
+              type="text" 
+              formControlName="titulo"
+              class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+            
+            <div *ngIf="escenaForm.get('titulo')?.invalid && escenaForm.get('titulo')?.touched" class="text-red-500 text-xs mt-1">
+              <div *ngIf="escenaForm.get('titulo')?.errors?.['required']">
+                El título es obligatorio.
+              </div>
+              <div *ngIf="escenaForm.get('titulo')?.errors?.['maxlength']">
+                El título no puede tener más de 50 caracteres.
+              </div>
+            </div>
+          </div>
+          
+          <!-- Descripción -->
+          <div>
+            <label for="escena-descripcion" class="block text-sm font-medium text-gray-400 mb-1">
+              Descripción (opcional)
+            </label>
+            <textarea 
+              id="escena-descripcion" 
+              formControlName="descripcion"
+              rows="2"
+              class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500"></textarea>
+            
+            <!-- Continuación de src/app/features/admin/components/carta-editor/carta-editor.component.html -->
+          <div *ngIf="escenaForm.get('descripcion')?.invalid && escenaForm.get('descripcion')?.touched" class="text-red-500 text-xs mt-1">
+            <div *ngIf="escenaForm.get('descripcion')?.errors?.['maxlength']">
+              La descripción no puede tener más de 200 caracteres.
+            </div>
+          </div>
+        </div>
+        
+        <!-- Duración -->
+        <div>
+          <label for="escena-duracion" class="block text-sm font-medium text-gray-400 mb-1">
+            Duración (segundos)
+          </label>
+          <input 
+            id="escena-duracion" 
+            type="number" 
+            formControlName="duracion"
+            class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+          
+          <div *ngIf="escenaForm.get('duracion')?.invalid && escenaForm.get('duracion')?.touched" class="text-red-500 text-xs mt-1">
+            <div *ngIf="escenaForm.get('duracion')?.errors?.['required']">
+              La duración es obligatoria.
+            </div>
+            <div *ngIf="escenaForm.get('duracion')?.errors?.['min']">
+              La duración debe ser al menos 5 segundos.
+            </div>
+            <div *ngIf="escenaForm.get('duracion')?.errors?.['max']">
+              La duración no puede superar los 300 segundos.
+            </div>
+          </div>
+        </div>
+        
+        <!-- Orden -->
+        <div>
+          <label for="escena-orden" class="block text-sm font-medium text-gray-400 mb-1">
+            Orden
+          </label>
+          <input 
+            id="escena-orden" 
+            type="number" 
+            formControlName="orden"
+            class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+          
+          <div *ngIf="escenaForm.get('orden')?.invalid && escenaForm.get('orden')?.touched" class="text-red-500 text-xs mt-1">
+            <div *ngIf="escenaForm.get('orden')?.errors?.['required']">
+              El orden es obligatorio.
+            </div>
+            <div *ngIf="escenaForm.get('orden')?.errors?.['min']">
+              El orden debe ser al menos 1.
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Línea divisoria -->
+      <div class="border-t border-restaurant-gold-800/30 my-6 pt-6">
+        <h4 class="text-lg font-medium text-restaurant-gold-400 mb-4">Platos de esta sección</h4>
+        
+        <!-- Formulario para añadir/editar un plato -->
+        <div *ngIf="!editingItem" class="mb-4">
+          <button 
+            type="button"
+            (click)="editingItem = true; itemForm.reset({nombre: '', descripcion: '', precio: 0})"
+            class="px-3 py-1 text-sm text-restaurant-gold-400 border border-restaurant-gold-800/50 rounded-md hover:bg-restaurant-gold-900/20 transition-colors">
+            Añadir plato
+          </button>
+        </div>
+        
+        <div *ngIf="editingItem" class="mb-6 bg-restaurant-gold-900/10 border border-restaurant-gold-800/30 p-4 rounded-lg">
+          <h5 class="text-base font-medium text-restaurant-gold-400 mb-3">
+            {{ editingItemIndex >= 0 ? 'Editar plato' : 'Añadir plato' }}
+          </h5>
+          
+          <form [formGroup]="itemForm" (ngSubmit)="addItem()" class="space-y-4">
+            <!-- Nombre -->
+            <div>
+              <label for="item-nombre" class="block text-sm font-medium text-gray-400 mb-1">
+                Nombre
+              </label>
+              <input 
+                id="item-nombre" 
+                type="text" 
+                formControlName="nombre"
+                class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+              
+              <div *ngIf="itemForm.get('nombre')?.invalid && itemForm.get('nombre')?.touched" class="text-red-500 text-xs mt-1">
+                <div *ngIf="itemForm.get('nombre')?.errors?.['required']">
+                  El nombre es obligatorio.
+                </div>
+                <div *ngIf="itemForm.get('nombre')?.errors?.['maxlength']">
+                  El nombre no puede tener más de 50 caracteres.
+                </div>
+              </div>
+            </div>
+            
+            <!-- Descripción -->
+            <div>
+              <label for="item-descripcion" class="block text-sm font-medium text-gray-400 mb-1">
+                Descripción
+              </label>
+              <textarea 
+                id="item-descripcion" 
+                formControlName="descripcion"
+                rows="2"
+                class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500"></textarea>
+              
+              <div *ngIf="itemForm.get('descripcion')?.invalid && itemForm.get('descripcion')?.touched" class="text-red-500 text-xs mt-1">
+                <div *ngIf="itemForm.get('descripcion')?.errors?.['required']">
+                  La descripción es obligatoria.
+                </div>
+                <div *ngIf="itemForm.get('descripcion')?.errors?.['maxlength']">
+                  La descripción no puede tener más de 200 caracteres.
+                </div>
+              </div>
+            </div>
+            
+            <!-- Precio -->
+            <div>
+              <label for="item-precio" class="block text-sm font-medium text-gray-400 mb-1">
+                Precio (€)
+              </label>
+              <input 
+                id="item-precio" 
+                type="number" 
+                step="0.01"
+                formControlName="precio"
+                class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+              
+              <div *ngIf="itemForm.get('precio')?.invalid && itemForm.get('precio')?.touched" class="text-red-500 text-xs mt-1">
+                <div *ngIf="itemForm.get('precio')?.errors?.['required']">
+                  El precio es obligatorio.
+                </div>
+                <div *ngIf="itemForm.get('precio')?.errors?.['min']">
+                  El precio debe ser mayor o igual a 0.
+                </div>
+              </div>
+            </div>
+            
+            <!-- Botones -->
+            <div class="flex justify-end space-x-3 pt-2">
+              <button 
+                type="button" 
+                (click)="cancelEditItem()"
+                class="px-3 py-1 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors text-sm">
+                Cancelar
+              </button>
+              <button 
+                type="submit" 
+                [disabled]="itemForm.invalid"
+                class="px-3 py-1 bg-gold-gradient text-black font-bold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                {{ editingItemIndex >= 0 ? 'Actualizar' : 'Añadir' }}
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Lista de platos -->
+        <div formArrayName="items">
+          <div *ngIf="items.length === 0" class="text-center py-4 text-gray-500">
+            No hay platos en esta sección. Añade algunos para que aparezcan aquí.
+          </div>
+          
+          <div *ngFor="let item of items.controls; let i = index" class="bg-restaurant-dark border border-restaurant-gold-800/20 rounded-lg p-3 mb-3 last:mb-0">
+            <div [formGroupName]="i" class="flex justify-between items-start">
+              <div>
+                <div class="text-white font-medium">{{ item.value.nombre }}</div>
+                <div class="text-gray-400 text-sm">{{ item.value.descripcion }}</div>
+                <div class="text-restaurant-gold-400 mt-1">{{ item.value.precio | currency:'EUR':'symbol':'1.2-2' }}</div>
+              </div>
+              <div class="flex space-x-2">
+                <button 
+                  type="button"
+                  (click)="editItem(i)"
+                  class="text-restaurant-gold-400 hover:text-restaurant-gold-300 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  </svg>
+                </button>
+                <button 
+                  type="button"
+                  (click)="removeItem(i)"
+                  class="text-red-500 hover:text-red-400 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botones de acción principales -->
+      <div class="flex justify-end space-x-3 pt-4 border-t border-restaurant-gold-800/30">
+        <button 
+          type="button" 
+          (click)="cancelEdit()"
+          class="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors">
+          Cancelar
+        </button>
+        <button 
+          type="button" 
+          [disabled]="escenaForm.invalid || saving"
+          (click)="saveEscena()"
+          class="px-4 py-2 bg-gold-gradient text-black font-bold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ saving ? 'Guardando...' : (editingEscena ? 'Actualizar sección' : 'Crear sección') }}
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Lista de secciones de carta -->
+  <div *ngIf="loading" class="py-4 text-center">
+    <div class="w-8 h-8 border-4 border-restaurant-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+    <p class="text-restaurant-gold-500 text-sm">Cargando secciones de carta...</p>
+  </div>
+  
+  <div *ngIf="!loading && (escenas$ | async) as escenas">
+    <div *ngIf="escenas.length === 0" class="text-center py-6 text-gray-500">
+      No hay secciones de carta configuradas. Haz clic en "Añadir nueva sección" para comenzar.
+    </div>
+    
+    <div *ngIf="escenas.length > 0" class="space-y-4">
+      <div *ngFor="let escena of escenas" class="bg-restaurant-dark border border-restaurant-gold-800/30 rounded-lg p-4 hover:shadow-gold transition-shadow duration-300">
+        <div class="flex justify-between items-start mb-2">
+          <div class="flex items-center">
+            <div class="w-6 h-6 flex items-center justify-center rounded-full bg-restaurant-gold-900/50 text-restaurant-gold-400 mr-3">
+              {{ escena.orden }}
+            </div>
+            <h4 class="text-lg font-medium text-white">{{ escena.titulo }}</h4>
+          </div>
+          <div class="flex space-x-2">
+            <button 
+              (click)="editEscena(escena)"
+              class="text-restaurant-gold-400 hover:text-restaurant-gold-300 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+            </button>
+            <button 
+              (click)="deleteEscena(escena.id || '')"
+              class="text-red-500 hover:text-red-400 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div *ngIf="escena.descripcion" class="text-gray-400 text-sm mb-2">
+          {{ escena.descripcion }}
+        </div>
+        
+        <div class="text-sm text-gray-400 mb-3">
+          <span class="font-medium text-restaurant-gold-400">Duración:</span> {{ escena.duracion }} segundos
+        </div>
+        
+        <!-- Lista de platos en esta sección -->
+        <div *ngIf="escena.contenido?.items && escena.contenido.items.length > 0" class="mt-3 border-t border-restaurant-gold-800/20 pt-3">
+          <h5 class="text-sm font-medium text-restaurant-gold-400 mb-2">Platos en esta sección:</h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div *ngFor="let item of escena.contenido.items" class="text-sm">
+              <div class="flex justify-between">
+                <span class="text-white">{{ item.nombre }}</span>
+                <span class="text-restaurant-gold-400">{{ item.precio | currency:'EUR':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="text-gray-400 text-xs">{{ item.descripcion }}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="!escena.contenido?.items || escena.contenido.items.length === 0" class="mt-3 border-t border-restaurant-gold-800/20 pt-3 text-gray-500 text-sm">
+          No hay platos en esta sección.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

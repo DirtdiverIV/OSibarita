@@ -71,40 +71,36 @@
           </div>
           
           <!-- Contenido de edición (placeholder) -->
-          <div class="bg-restaurant-black/50 p-6 rounded-lg border border-restaurant-gold-800/30">
-            <p class="text-gray-400 text-center">
-              Aquí irá el formulario para editar el menú del día, tapas y raciones.
+          <div *ngIf="vistaSeleccionada === 'dia'" class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
+            <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Menú del Día</h2>
+            <p class="text-gray-400 mb-4">
+              Aquí puedes gestionar el menú del día, las tapas y las raciones.
             </p>
+            
+            <!-- Agregar nuestro componente de editor -->
+            <app-menu-dia-editor></app-menu-dia-editor>
           </div>
         </div>
         
         <div *ngIf="vistaSeleccionada === 'eventos'" class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
-          <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Eventos</h2>
-          <p class="text-gray-400 mb-4">
-            Gestiona las escenas de eventos y promociones que se mostrarán en los televisores.
-          </p>
-          
-          <!-- Contenido de edición (placeholder) -->
-          <div class="bg-restaurant-black/50 p-6 rounded-lg border border-restaurant-gold-800/30">
-            <p class="text-gray-400 text-center">
-              Aquí irá el editor de escenas de eventos.
+            <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Eventos</h2>
+            <p class="text-gray-400 mb-4">
+              Gestiona las escenas de eventos y promociones que se mostrarán en los televisores.
             </p>
+            
+            <!-- Añadir nuestro componente de editor de eventos -->
+            <app-eventos-editor></app-eventos-editor>
           </div>
-        </div>
         
-        <div *ngIf="vistaSeleccionada === 'carta'" class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
-          <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Carta</h2>
-          <p class="text-gray-400 mb-4">
-            Gestiona las diferentes secciones de la carta del restaurante.
-          </p>
-          
-          <!-- Contenido de edición (placeholder) -->
-          <div class="bg-restaurant-black/50 p-6 rounded-lg border border-restaurant-gold-800/30">
-            <p class="text-gray-400 text-center">
-              Aquí irá el editor de secciones de la carta.
+          <div *ngIf="vistaSeleccionada === 'carta'" class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
+            <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Carta</h2>
+            <p class="text-gray-400 mb-4">
+              Gestiona las diferentes secciones de la carta del restaurante.
             </p>
+            
+            <!-- Añadir nuestro componente de editor de carta -->
+            <app-carta-editor></app-carta-editor>
           </div>
-        </div>
         
         <div *ngIf="vistaSeleccionada === 'menu'" class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
           <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Menú</h2>
