@@ -1,1 +1,325 @@
-<p>configuracion works!</p>
+<!-- src/app/features/admin/pages/configuracion/configuracion.component.html -->
+<div class="min-h-screen bg-restaurant-black text-white">
+    <!-- Barra de navegación -->
+    <app-admin-navbar></app-admin-navbar>
+    
+    <!-- Contenido principal -->
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <!-- Cabecera -->
+      <div class="px-4 sm:px-0 mb-8">
+        <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gold-gradient">Configuración</h1>
+        <p class="mt-2 text-lg text-gray-400">Configura las vistas y temporizadores para cada TV.</p>
+      </div>
+      
+      <!-- Mensajes -->
+      <div *ngIf="successMessage" class="mb-4 p-4 bg-green-900/50 border border-green-800 text-green-300 rounded-md">
+        {{ successMessage }}
+      </div>
+      
+      <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-900/50 border border-red-800 text-red-300 rounded-md">
+        {{ errorMessage }}
+      </div>
+      
+      <!-- Estado de carga -->
+      <div *ngIf="loading" class="py-8 text-center">
+        <div class="w-12 h-12 border-4 border-restaurant-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-restaurant-gold-500">Cargando configuración...</p>
+      </div>
+      
+      <!-- Formularios de configuración -->
+      <div *ngIf="!loading" class="px-4 sm:px-0">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Configuración TV1 -->
+          <div class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gold-gradient h-1 w-full"></div>
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-restaurant-gold-400">TV 1</h2>
+                <button 
+                  (click)="abrirTV(1)" 
+                  class="px-3 py-1 text-sm text-restaurant-gold-400 border border-restaurant-gold-800/50 rounded-md hover:bg-restaurant-gold-900/20 transition-colors">
+                  Abrir TV
+                </button>
+              </div>
+              
+              <form [formGroup]="formTV1" (ngSubmit)="guardarConfiguracion('tv1', formTV1)" class="space-y-4">
+                <!-- Selección de vista -->
+                <div>
+                  <label for="vista1" class="block text-sm font-medium text-gray-400 mb-1">Vista a mostrar</label>
+                  <select 
+                    id="vista1" 
+                    formControlName="vista"
+                    class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+                    <option [value]="''">Seleccionar vista</option>
+                    <option *ngFor="let vista of (vistas$ | async)" [value]="vista.id">
+                      {{ vista.nombre }}
+                    </option>
+                  </select>
+                  
+                  <div *ngIf="formTV1.get('vista')?.invalid && formTV1.get('vista')?.touched" class="text-red-500 text-xs mt-1">
+                    Por favor, selecciona una vista.
+                  </div>
+                </div>
+                
+                <!-- Temporizador -->
+                <div>
+                  <label for="temporizador1" class="block text-sm font-medium text-gray-400 mb-1">
+                    Temporizador (segundos)
+                  </label>
+                  <input 
+                    id="temporizador1" 
+                    type="number" 
+                    formControlName="temporizador"
+                    class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+                  
+                  <div *ngIf="formTV1.get('temporizador')?.invalid && formTV1.get('temporizador')?.touched" class="text-red-500 text-xs mt-1">
+                    <div *ngIf="formTV1.get('temporizador')?.errors?.['required']">
+                      Por favor, ingresa un valor para el temporizador.
+                    </div>
+                    <div *ngIf="formTV1.get('temporizador')?.errors?.['min']">
+                      El temporizador debe ser al menos 5 segundos.
+                    </div>
+                    <div *ngIf="formTV1.get('temporizador')?.errors?.['max']">
+                      El temporizador no puede superar los 300 segundos.
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Botón guardar -->
+                <div class="pt-2">
+                  <button 
+                    type="submit" 
+                    [disabled]="formTV1.invalid || saving"
+                    class="w-full px-4 py-2 bg-gold-gradient text-black font-bold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                    {{ saving ? 'Guardando...' : 'Guardar configuración' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          
+          <!-- Configuración TV2 -->
+          <div class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gold-gradient h-1 w-full"></div>
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-restaurant-gold-400">TV 2</h2>
+                <button 
+                  (click)="abrirTV(2)" 
+                  class="px-3 py-1 text-sm text-restaurant-gold-400 border border-restaurant-gold-800/50 rounded-md hover:bg-restaurant-gold-900/20 transition-colors">
+                  Abrir TV
+                </button>
+              </div>
+              
+              <form [formGroup]="formTV2" (ngSubmit)="guardarConfiguracion('tv2', formTV2)" class="space-y-4">
+                <!-- Selección de vista -->
+                <div>
+                  <label for="vista2" class="block text-sm font-medium text-gray-400 mb-1">Vista a mostrar</label>
+                  <select 
+                    id="vista2" 
+                    formControlName="vista"
+                    class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+                    <option [value]="''">Seleccionar vista</option>
+                    <option *ngFor="let vista of (vistas$ | async)" [value]="vista.id">
+                      {{ vista.nombre }}
+                    </option>
+                  </select>
+                  
+                  <div *ngIf="formTV2.get('vista')?.invalid && formTV2.get('vista')?.touched" class="text-red-500 text-xs mt-1">
+                    Por favor, selecciona una vista.
+                  </div>
+                </div>
+                
+                <!-- Temporizador -->
+                <div>
+                  <label for="temporizador2" class="block text-sm font-medium text-gray-400 mb-1">
+                    Temporizador (segundos)
+                  </label>
+                  <input 
+                    id="temporizador2" 
+                    type="number" 
+                    formControlName="temporizador"
+                    class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+                  
+                  <div *ngIf="formTV2.get('temporizador')?.invalid && formTV2.get('temporizador')?.touched" class="text-red-500 text-xs mt-1">
+                    <div *ngIf="formTV2.get('temporizador')?.errors?.['required']">
+                      Por favor, ingresa un valor para el temporizador.
+                    </div>
+                    <div *ngIf="formTV2.get('temporizador')?.errors?.['min']">
+                      El temporizador debe ser al menos 5 segundos.
+                    </div>
+                    <div *ngIf="formTV2.get('temporizador')?.errors?.['max']">
+                      El temporizador no puede superar los 300 segundos.
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Botón guardar -->
+                <div class="pt-2">
+                  <button 
+                    type="submit" 
+                    [disabled]="formTV2.invalid || saving"
+                    class="w-full px-4 py-2 bg-gold-gradient text-black font-bold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                    {{ saving ? 'Guardando...' : 'Guardar configuración' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          
+          <!-- Configuración TV3 -->
+          <div class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gold-gradient h-1 w-full"></div>
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-restaurant-gold-400">TV 3</h2>
+                <button 
+                  (click)="abrirTV(3)" 
+                  class="px-3 py-1 text-sm text-restaurant-gold-400 border border-restaurant-gold-800/50 rounded-md hover:bg-restaurant-gold-900/20 transition-colors">
+                  Abrir TV
+                </button>
+              </div>
+              
+              <form [formGroup]="formTV3" (ngSubmit)="guardarConfiguracion('tv3', formTV3)" class="space-y-4">
+                <!-- Selección de vista -->
+                <div>
+                  <label for="vista3" class="block text-sm font-medium text-gray-400 mb-1">Vista a mostrar</label>
+                  <select 
+                    id="vista3" 
+                    formControlName="vista"
+                    class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+                    <option [value]="''">Seleccionar vista</option>
+                    <option *ngFor="let vista of (vistas$ | async)" [value]="vista.id">
+                      {{ vista.nombre }}
+                    </option>
+                  </select>
+                  
+                  <div *ngIf="formTV3.get('vista')?.invalid && formTV3.get('vista')?.touched" class="text-red-500 text-xs mt-1">
+                    Por favor, selecciona una vista.
+                  </div>
+                </div>
+                
+                <!-- Temporizador -->
+                <div>
+                  <label for="temporizador3" class="block text-sm font-medium text-gray-400 mb-1">
+                    Temporizador (segundos)
+                  </label>
+                  <input 
+                    id="temporizador3" 
+                    type="number" 
+                    formControlName="temporizador"
+                    class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+                  
+                  <div *ngIf="formTV3.get('temporizador')?.invalid && formTV3.get('temporizador')?.touched" class="text-red-500 text-xs mt-1">
+                    <div *ngIf="formTV3.get('temporizador')?.errors?.['required']">
+                      Por favor, ingresa un valor para el temporizador.
+                    </div>
+                    <div *ngIf="formTV3.get('temporizador')?.errors?.['min']">
+                      El temporizador debe ser al menos 5 segundos.
+                    </div>
+                    <div *ngIf="formTV3.get('temporizador')?.errors?.['max']">
+                      El temporizador no puede superar los 300 segundos.
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Botón guardar -->
+                <div class="pt-2">
+                  <button 
+                    type="submit" 
+                    [disabled]="formTV3.invalid || saving"
+                    class="w-full px-4 py-2 bg-gold-gradient text-black font-bold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                    {{ saving ? 'Guardando...' : 'Guardar configuración' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          
+          <!-- Configuración TV4 -->
+          <div class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-gold-gradient h-1 w-full"></div>
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-restaurant-gold-400">TV 4</h2>
+                <button 
+                  (click)="abrirTV(4)" 
+                  class="px-3 py-1 text-sm text-restaurant-gold-400 border border-restaurant-gold-800/50 rounded-md hover:bg-restaurant-gold-900/20 transition-colors">
+                  Abrir TV
+                </button>
+              </div>
+              
+              <form [formGroup]="formTV4" (ngSubmit)="guardarConfiguracion('tv4', formTV4)" class="space-y-4">
+                <!-- Selección de vista -->
+                <div>
+                  <label for="vista4" class="block text-sm font-medium text-gray-400 mb-1">Vista a mostrar</label>
+                  <select 
+                    id="vista4" 
+                    formControlName="vista"
+                    class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+                    <option [value]="''">Seleccionar vista</option>
+                    <option *ngFor="let vista of (vistas$ | async)" [value]="vista.id">
+                      {{ vista.nombre }}
+                    </option>
+                  </select>
+                  
+                  <div *ngIf="formTV4.get('vista')?.invalid && formTV4.get('vista')?.touched" class="text-red-500 text-xs mt-1">
+                    Por favor, selecciona una vista.
+                  </div>
+                </div>
+                
+                <!-- Temporizador -->
+                <div>
+                  <label for="temporizador4" class="block text-sm font-medium text-gray-400 mb-1">
+                    Temporizador (segundos)
+                  </label>
+                  <input 
+                    id="temporizador4" 
+                    type="number" 
+                    formControlName="temporizador"
+                    class="w-full bg-restaurant-black border border-restaurant-gold-800/50 rounded-md px-3 py-2 focus:outline-none focus:border-restaurant-gold-500">
+                  
+                  <div *ngIf="formTV4.get('temporizador')?.invalid && formTV4.get('temporizador')?.touched" class="text-red-500 text-xs mt-1">
+                    <div *ngIf="formTV4.get('temporizador')?.errors?.['required']">
+                      Por favor, ingresa un valor para el temporizador.
+                    </div>
+                    <div *ngIf="formTV4.get('temporizador')?.errors?.['min']">
+                      El temporizador debe ser al menos 5 segundos.
+                    </div>
+                    <div *ngIf="formTV4.get('temporizador')?.errors?.['max']">
+                      El temporizador no puede superar los 300 segundos.
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Botón guardar -->
+                <div class="pt-2">
+                  <button 
+                    type="submit" 
+                    [disabled]="formTV4.invalid || saving"
+                    class="w-full px-4 py-2 bg-gold-gradient text-black font-bold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                    {{ saving ? 'Guardando...' : 'Guardar configuración' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sección de información adicional -->
+        <div class="mt-8 bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
+          <h3 class="text-xl font-bold text-restaurant-gold-400 mb-4">Información</h3>
+          <p class="text-gray-400 mb-2">
+            El temporizador controla cada cuántos segundos se actualiza la vista en la TV correspondiente.
+          </p>
+          <p class="text-gray-400 mb-2">
+            Para algunas vistas como Eventos y Carta, este valor también determina cuánto tiempo se muestra cada escena.
+          </p>
+          <p class="text-gray-400">
+            Puedes abrir cada TV en una ventana separada haciendo clic en el botón "Abrir TV".
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>

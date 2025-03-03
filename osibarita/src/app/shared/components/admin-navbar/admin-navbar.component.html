@@ -1,1 +1,128 @@
-<p>admin-navbar works!</p>
+<!-- src/app/shared/components/admin-navbar/admin-navbar.component.html -->
+<nav class="bg-restaurant-black border-b border-restaurant-gold-800/50 text-white">
+    <!-- Barra superior principal -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <!-- Logo y enlaces principales -->
+        <div class="flex items-center">
+          <!-- Logo/Nombre -->
+          <div class="flex-shrink-0 flex items-center">
+            <span class="text-xl font-bold text-transparent bg-clip-text bg-gold-gradient">Sibarita Admin</span>
+          </div>
+          
+          <!-- Enlaces principales (visibles en pantallas medianas y grandes) -->
+          <div class="hidden md:ml-6 md:flex md:space-x-4">
+            <a 
+              routerLink="/admin/dashboard" 
+              routerLinkActive="border-restaurant-gold-500 text-restaurant-gold-400" 
+              [routerLinkActiveOptions]="{exact: true}"
+              class="px-3 py-2 text-sm font-medium border-b-2 border-transparent hover:border-restaurant-gold-500/70 hover:text-restaurant-gold-300 transition-colors duration-200">
+              Dashboard
+            </a>
+            <a 
+              routerLink="/admin/gestion-vistas" 
+              routerLinkActive="border-restaurant-gold-500 text-restaurant-gold-400" 
+              [routerLinkActiveOptions]="{exact: true}"
+              class="px-3 py-2 text-sm font-medium border-b-2 border-transparent hover:border-restaurant-gold-500/70 hover:text-restaurant-gold-300 transition-colors duration-200">
+              Gestión de Vistas
+            </a>
+            <a 
+              routerLink="/admin/configuracion" 
+              routerLinkActive="border-restaurant-gold-500 text-restaurant-gold-400" 
+              [routerLinkActiveOptions]="{exact: true}"
+              class="px-3 py-2 text-sm font-medium border-b-2 border-transparent hover:border-restaurant-gold-500/70 hover:text-restaurant-gold-300 transition-colors duration-200">
+              Configuración
+            </a>
+          </div>
+        </div>
+        
+        <!-- Perfil y menú hamburguesa -->
+        <div class="flex items-center">
+          <!-- Perfil (visible en pantallas medianas y grandes) -->
+          <div class="hidden md:ml-4 md:flex md:items-center">
+            <div class="relative">
+              <div class="flex items-center">
+                <span class="text-sm text-gray-400 mr-2">{{ userName }}</span>
+                <button 
+                  (click)="logout()" 
+                  class="px-3 py-1 text-sm text-restaurant-gold-400 border border-restaurant-gold-800/50 rounded-md hover:bg-restaurant-gold-900/20 transition-colors">
+                  Salir
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Botón de menú hamburguesa (visible en pantallas pequeñas) -->
+          <div class="flex items-center md:hidden">
+            <button 
+              (click)="toggleMenu()" 
+              class="inline-flex items-center justify-center p-2 rounded-md text-restaurant-gold-400 hover:text-restaurant-gold-300 hover:bg-restaurant-gold-900/20 focus:outline-none"
+              aria-expanded="false">
+              <span class="sr-only">Abrir menú principal</span>
+              <!-- Icono de menú hamburguesa -->
+              <svg 
+                *ngIf="!isMenuOpen" 
+                class="block h-6 w-6" 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <!-- Icono X (cerrar) -->
+              <svg 
+                *ngIf="isMenuOpen" 
+                class="block h-6 w-6" 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Menú móvil (visible cuando isMenuOpen = true) -->
+    <div class="md:hidden" [ngClass]="{ 'block': isMenuOpen, 'hidden': !isMenuOpen }">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-restaurant-gold-800/30">
+        <a 
+          routerLink="/admin/dashboard" 
+          routerLinkActive="bg-restaurant-gold-900/30 text-restaurant-gold-400" 
+          [routerLinkActiveOptions]="{exact: true}"
+          class="block px-3 py-2 rounded-md text-base font-medium hover:bg-restaurant-gold-900/20 hover:text-restaurant-gold-300 transition-colors duration-200">
+          Dashboard
+        </a>
+        <a 
+          routerLink="/admin/gestion-vistas" 
+          routerLinkActive="bg-restaurant-gold-900/30 text-restaurant-gold-400" 
+          [routerLinkActiveOptions]="{exact: true}"
+          class="block px-3 py-2 rounded-md text-base font-medium hover:bg-restaurant-gold-900/20 hover:text-restaurant-gold-300 transition-colors duration-200">
+          Gestión de Vistas
+        </a>
+        <a 
+          routerLink="/admin/configuracion" 
+          routerLinkActive="bg-restaurant-gold-900/30 text-restaurant-gold-400" 
+          [routerLinkActiveOptions]="{exact: true}"
+          class="block px-3 py-2 rounded-md text-base font-medium hover:bg-restaurant-gold-900/20 hover:text-restaurant-gold-300 transition-colors duration-200">
+          Configuración
+        </a>
+      </div>
+      
+      <!-- Perfil en móvil -->
+      <div class="pt-4 pb-3 border-t border-restaurant-gold-800/30">
+        <div class="flex items-center px-5">
+          <div class="ml-3">
+            <div class="text-base font-medium text-white">{{ userName }}</div>
+            <button 
+              (click)="logout()" 
+              class="mt-2 px-3 py-1 text-sm text-restaurant-gold-400 border border-restaurant-gold-800/50 rounded-md hover:bg-restaurant-gold-900/20 transition-colors">
+              Salir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>

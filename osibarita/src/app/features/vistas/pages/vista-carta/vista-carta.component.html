@@ -1,1 +1,113 @@
-<p>vista-carta works!</p>
+<!-- src/app/features/vistas/pages/vista-carta/vista-carta.component.html -->
+<div class="w-full h-full bg-restaurant-black text-white overflow-hidden relative">
+    <!-- Fondo elegante con gradiente sutil -->
+    <div class="absolute inset-0 opacity-5 mix-blend-overlay bg-gradient-to-br from-gray-900 to-black"></div>
+    
+    <!-- Decoración lateral -->
+    <div class="absolute left-0 top-0 w-1 h-full bg-gold-gradient opacity-30"></div>
+    <div class="absolute right-0 top-0 w-1 h-full bg-gold-gradient opacity-30"></div>
+    
+    <!-- Estado de carga -->
+    <div *ngIf="loading" class="absolute inset-0 flex items-center justify-center z-20 bg-black bg-opacity-70">
+      <div class="text-center">
+        <div class="w-16 h-16 border-4 border-restaurant-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-restaurant-gold-500 text-xl">Cargando carta...</p>
+      </div>
+    </div>
+    
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="absolute inset-0 flex items-center justify-center z-20 bg-black bg-opacity-70">
+      <div class="bg-red-900/80 p-6 rounded-lg max-w-md text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <h3 class="text-2xl font-bold text-red-300 mb-2">Error</h3>
+        <p class="text-white text-xl mb-4">{{ errorMessage }}</p>
+        <button (click)="retryLoading()" class="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded transition-colors text-lg">
+          Reintentar
+        </button>
+      </div>
+    </div>
+    
+    <!-- Sin elementos de carta -->
+    <div *ngIf="!loading && !error && escenas.length === 0" class="absolute inset-0 flex items-center justify-center">
+      <div class="text-center p-8 bg-restaurant-dark/80 rounded-xl border border-restaurant-gold-800/30 max-w-md">
+        <h2 class="text-3xl font-bold text-restaurant-gold-400 mb-4">Carta no disponible</h2>
+        <p class="text-xl text-gray-400">No hay elementos de carta configurados.</p>
+      </div>
+    </div>
+    
+    <!-- Contenedor principal -->
+    <div *ngIf="!loading && !error && currentEscena" class="w-full h-full p-8 flex flex-col relative z-10">
+      <!-- Cabecera de la sección actual -->
+      <div class="text-center mb-8">
+        <h1 class="text-6xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient mb-2">
+          {{ currentEscena.titulo }}
+        </h1>
+        
+        <div class="h-1 bg-gradient-to-r from-transparent via-restaurant-gold-500 to-transparent w-full my-4"></div>
+        
+        <div *ngIf="currentEscena.descripcion" class="text-2xl text-gray-300 mt-4 max-w-3xl mx-auto">
+          {{ currentEscena.descripcion }}
+        </div>
+      </div>
+      
+      <!-- Contenido de la carta -->
+      <div class="flex-grow overflow-y-auto pb-16">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Items de la carta (si existen) -->
+          <div *ngIf="currentEscena.contenido?.items">
+            <div *ngFor="let item of currentEscena.contenido.items; let i = index" class="mb-10 last:mb-0 group">
+              <div class="flex items-start space-x-4 border-b border-restaurant-gold-800/30 pb-6">
+                <!-- Imagen del plato (placeholder) -->
+                <div class="w-24 h-24 md:w-32 md:h-32 bg-restaurant-dark rounded-lg overflow-hidden flex-shrink-0 border border-restaurant-gold-800/50">
+                  <!-- En un escenario real, se usaría la imagen del item: item.imagen ?? getImagenPlatoPlaceholder(i) -->
+                  <div class="w-full h-full bg-gradient-to-br from-restaurant-gold-900/30 to-gray-900 flex items-center justify-center">
+                    <span class="text-restaurant-gold-400">Imagen</span>
+                  </div>
+                </div>
+                
+                <!-- Información del plato -->
+                <div class="flex-grow">
+                  <div class="flex justify-between items-start">
+                    <h3 class="text-2xl font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">
+                      {{ item.nombre }}
+                    </h3>
+                    <div class="text-transparent bg-clip-text bg-gold-gradient font-bold text-2xl ml-4">
+                      {{ item.precio | currency:'EUR':'symbol':'1.2-2' }}
+                    </div>
+                  </div>
+                  
+                  <p class="text-gray-400 mt-2 text-lg">{{ item.descripcion }}</p>
+                  
+                  <!-- Etiquetas o características adicionales -->
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <span *ngIf="i % 2 === 0" class="px-2 py-1 bg-restaurant-gold-900/20 text-restaurant-gold-400 text-xs rounded-full">
+                      Especialidad
+                    </span>
+                    <span *ngIf="i % 3 === 0" class="px-2 py-1 bg-restaurant-gold-900/20 text-restaurant-gold-400 text-xs rounded-full">
+                      Sin gluten
+                    </span>
+                    <span *ngIf="i % 4 === 0" class="px-2 py-1 bg-restaurant-gold-900/20 text-restaurant-gold-400 text-xs rounded-full">
+                      Vegetariano
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Indicadores de escenas -->
+      <div *ngIf="escenas.length > 1" class="absolute bottom-8 left-0 w-full flex justify-center space-x-2">
+        <div *ngFor="let escena of escenas; let i = index" 
+             class="w-3 h-3 rounded-full"
+             [ngClass]="i === currentIndex ? 'bg-restaurant-gold-500' : 'bg-gray-600'"></div>
+      </div>
+      
+      <!-- Barra de progreso -->
+      <div *ngIf="currentEscena" class="absolute bottom-0 left-0 h-1 bg-gold-gradient" 
+           [style.width.%]="(currentIndex + 1) / escenas.length * 100"></div>
+    </div>
+  </div>

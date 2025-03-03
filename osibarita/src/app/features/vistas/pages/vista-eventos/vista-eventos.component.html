@@ -1,1 +1,194 @@
-<p>vista-eventos works!</p>
+<!-- src/app/features/vistas/pages/vista-eventos/vista-eventos.component.html -->
+<div class="w-full h-full bg-restaurant-black text-white overflow-hidden relative">
+    <!-- Fondo elegante con gradiente sutil -->
+    <div class="absolute inset-0 opacity-5 mix-blend-overlay bg-gradient-to-br from-gray-900 to-black"></div>
+    
+    <!-- Decoración lateral -->
+    <div class="absolute left-0 top-0 w-1 h-full bg-gold-gradient opacity-30"></div>
+    <div class="absolute right-0 top-0 w-1 h-full bg-gold-gradient opacity-30"></div>
+    
+    <!-- Estado de carga -->
+    <div *ngIf="loading" class="absolute inset-0 flex items-center justify-center z-20 bg-black bg-opacity-70">
+      <div class="text-center">
+        <div class="w-16 h-16 border-4 border-restaurant-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-restaurant-gold-500 text-xl">Cargando promociones...</p>
+      </div>
+    </div>
+    
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="absolute inset-0 flex items-center justify-center z-20 bg-black bg-opacity-70">
+      <div class="bg-red-900/80 p-6 rounded-lg max-w-md text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <h3 class="text-2xl font-bold text-red-300 mb-2">Error</h3>
+        <p class="text-white text-xl mb-4">{{ errorMessage }}</p>
+        <button (click)="retryLoading()" class="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded transition-colors text-lg">
+          Reintentar
+        </button>
+      </div>
+    </div>
+    
+    <!-- Contenedor principal con escenas configuradas -->
+    <div *ngIf="!loading && !error && currentEvento" class="w-full h-full relative z-10">
+      <!-- Escena actual a pantalla completa -->
+      <div class="w-full h-full flex flex-col">
+        <!-- Encabezado con título -->
+        <div class="text-center py-6">
+          <h1 class="text-6xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient">
+            {{ currentEvento.titulo }}
+          </h1>
+          <div class="h-1 bg-gradient-to-r from-transparent via-restaurant-gold-500 to-transparent w-full my-4"></div>
+        </div>
+        
+        <!-- Contenedor principal con imagen grande y contenido -->
+        <div class="flex-grow flex flex-col md:flex-row p-6 gap-6">
+          <!-- Imagen grande (lado izquierdo) - Ocupa aproximadamente 60% del espacio -->
+          <div class="w-full md:w-3/5 h-full md:h-auto rounded-xl overflow-hidden border border-restaurant-gold-800/30 shadow-gold">
+            <!-- Aquí normalmente iría una imagen real desde currentEvento.contenido.imagen -->
+            <div class="w-full h-full bg-gradient-to-br from-restaurant-dark to-restaurant-black/70 flex items-center justify-center relative">
+              <!-- Imagen de placeholder que ocupa todo el espacio -->
+              <div class="absolute inset-0 bg-restaurant-gold-900/10 backdrop-blur-sm flex items-center justify-center">
+                <!-- Si hay imagen en el contenido, la usaríamos aquí -->
+                <div class="w-full h-full flex items-center justify-center text-center p-8">
+                  <div>
+                    <!-- Texto sobre la imagen -->
+                    <h2 class="text-5xl font-bold text-white mb-6 drop-shadow-lg">Tus Eventos Inolvidables</h2>
+                    <p class="text-2xl text-white drop-shadow-lg mb-8">El marco perfecto para tus celebraciones especiales</p>
+                    
+                    <!-- Destacado -->
+                    <div class="inline-block bg-restaurant-gold-500/90 px-8 py-4 rounded-lg text-black text-3xl font-bold transform -rotate-2 shadow-lg">
+                      ¡Consulta nuestras opciones!
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Información (lado derecho) - Ocupa aproximadamente 40% del espacio -->
+          <div class="w-full md:w-2/5 flex flex-col space-y-6">
+            <!-- Descripción del evento -->
+            <div *ngIf="currentEvento.descripcion" class="text-xl text-gray-300 bg-restaurant-dark/80 p-6 rounded-lg border border-restaurant-gold-800/30">
+              {{ currentEvento.descripcion }}
+            </div>
+            
+            <!-- Detalles específicos que vienen de la base de datos -->
+            <div *ngIf="currentEvento.contenido" class="space-y-6 flex-grow">
+              <div *ngIf="currentEvento.contenido.precio" class="bg-restaurant-dark/80 p-6 rounded-lg border border-restaurant-gold-800/30 text-center">
+                <div class="text-2xl text-restaurant-gold-400 mb-2">Desde solo:</div>
+                <div class="text-5xl font-bold text-transparent bg-clip-text bg-gold-gradient">
+                  {{ currentEvento.contenido.precio | currency:'EUR':'symbol':'1.0-0' }}
+                </div>
+                <div class="text-lg text-gray-400 mt-2">por persona</div>
+              </div>
+              
+              <!-- Tipos de eventos -->
+              <div class="bg-restaurant-dark/80 p-6 rounded-lg border border-restaurant-gold-800/30">
+                <h3 class="text-xl font-bold text-restaurant-gold-400 mb-4">Tipos de eventos:</h3>
+                <ul class="space-y-3">
+                  <li class="flex items-start">
+                    <div class="w-4 h-4 rounded-full bg-restaurant-gold-500 flex-shrink-0 mt-1"></div>
+                    <span class="text-lg ml-3">Celebraciones familiares</span>
+                  </li>
+                  <li class="flex items-start">
+                    <div class="w-4 h-4 rounded-full bg-restaurant-gold-500 flex-shrink-0 mt-1"></div>
+                    <span class="text-lg ml-3">Eventos empresariales</span>
+                  </li>
+                  <li class="flex items-start">
+                    <div class="w-4 h-4 rounded-full bg-restaurant-gold-500 flex-shrink-0 mt-1"></div>
+                    <span class="text-lg ml-3">Bodas y ceremonias</span>
+                  </li>
+                  <li class="flex items-start">
+                    <div class="w-4 h-4 rounded-full bg-restaurant-gold-500 flex-shrink-0 mt-1"></div>
+                    <span class="text-lg ml-3">Comidas de empresa</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <!-- Llamada a la acción -->
+            <div class="bg-gold-gradient text-black p-6 rounded-lg text-center">
+              <h3 class="text-2xl font-bold mb-2">¡Reserva ahora!</h3>
+              <p class="text-lg">
+                Consulta con nuestro personal sobre disponibilidad y menús personalizados.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Indicador de eventos y barra de progreso -->
+      <div *ngIf="eventos.length > 1">
+        <!-- Indicadores de puntos -->
+        <div class="absolute bottom-8 left-0 w-full flex justify-center space-x-2">
+          <div *ngFor="let evento of eventos; let i = index" 
+               class="w-3 h-3 rounded-full"
+               [ngClass]="i === currentIndex ? 'bg-restaurant-gold-500' : 'bg-gray-600'"></div>
+        </div>
+        
+        <!-- Barra de progreso -->
+        <div class="absolute bottom-0 left-0 h-1 bg-gold-gradient" 
+             [style.width.%]="(currentIndex + 1) / eventos.length * 100"></div>
+      </div>
+    </div>
+    
+    <!-- Vista alternativa si no hay escenas configuradas -->
+    <div *ngIf="!loading && !error && eventos.length === 0" class="w-full h-full flex flex-col relative z-10">
+      <!-- Encabezado -->
+      <div class="text-center py-6">
+        <h1 class="text-6xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient">
+          Celebra tus eventos con nosotros
+        </h1>
+        <div class="h-1 bg-gradient-to-r from-transparent via-restaurant-gold-500 to-transparent w-full my-4"></div>
+      </div>
+      
+      <!-- Contenido principal con imagen -->
+      <div class="flex-grow flex flex-col md:flex-row p-6 gap-6">
+        <!-- Imagen grande (lado izquierdo) -->
+        <div class="w-full md:w-3/5 rounded-xl overflow-hidden border border-restaurant-gold-800/30 shadow-gold">
+          <div class="w-full h-full bg-gradient-to-br from-restaurant-dark to-restaurant-black/70 flex items-center justify-center relative">
+            <!-- Imagen de placeholder -->
+            <div class="absolute inset-0 bg-restaurant-gold-900/10 backdrop-blur-sm flex items-center justify-center">
+              <div class="text-center p-8">
+                <h2 class="text-5xl font-bold text-white mb-6 drop-shadow-lg">Espacios Exclusivos</h2>
+                <p class="text-2xl text-white drop-shadow-lg mb-8">Para cualquier tipo de celebración</p>
+                
+                <!-- Destacado -->
+                <div class="inline-block bg-restaurant-gold-500/90 px-8 py-4 rounded-lg text-black text-3xl font-bold transform -rotate-2 shadow-lg">
+                  ¡Haz tu evento memorable!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Información (lado derecho) -->
+        <div class="w-full md:w-2/5 flex flex-col space-y-6">
+          <div class="text-xl text-gray-300 bg-restaurant-dark/80 p-6 rounded-lg border border-restaurant-gold-800/30">
+            El lugar perfecto para tus momentos especiales. Ofrecemos menús personalizados y espacios adaptados para cualquier ocasión.
+          </div>
+          
+          <!-- Tipos de eventos -->
+          <div class="bg-restaurant-dark/80 p-6 rounded-lg border border-restaurant-gold-800/30 flex-grow">
+            <h3 class="text-xl font-bold text-restaurant-gold-400 mb-4">Disponemos de:</h3>
+            <ul class="space-y-4">
+              <li *ngFor="let tipo of tiposEventos" class="mb-4 last:mb-0">
+                <h4 class="text-xl font-medium text-restaurant-gold-300">{{ tipo.titulo }}</h4>
+                <p class="text-gray-400">{{ tipo.descripcion }}</p>
+                <div class="mt-1 text-sm text-restaurant-gold-400">{{ tipo.capacidad }}</div>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Llamada a la acción -->
+          <div class="bg-gold-gradient text-black p-6 rounded-lg text-center">
+            <h3 class="text-2xl font-bold mb-2">¡Infórmate!</h3>
+            <p class="text-lg">
+              Pregunta por nuestros menús personalizados y disponibilidad.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

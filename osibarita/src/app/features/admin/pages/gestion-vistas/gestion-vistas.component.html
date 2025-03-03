@@ -1,1 +1,124 @@
-<p>gestion-vistas works!</p>
+<!-- src/app/features/admin/pages/gestion-vistas/gestion-vistas.component.html -->
+<div class="min-h-screen bg-restaurant-black text-white">
+    <!-- Barra de navegación -->
+    <app-admin-navbar></app-admin-navbar>
+    
+    <!-- Contenido principal -->
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <!-- Cabecera -->
+      <div class="px-4 sm:px-0 mb-8">
+        <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gold-gradient">Gestión de Vistas</h1>
+        <p class="mt-2 text-lg text-gray-400">Administra el contenido de las diferentes vistas.</p>
+      </div>
+      
+      <!-- Estado de carga -->
+      <div *ngIf="loading" class="py-8 text-center">
+        <div class="w-12 h-12 border-4 border-restaurant-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-restaurant-gold-500">Cargando vistas...</p>
+      </div>
+      
+      <!-- Error -->
+      <div *ngIf="error" class="px-4 sm:px-0 mb-6">
+        <div class="bg-red-900/50 border border-red-800 text-red-300 p-4 rounded-md">
+          <p>{{ errorMessage }}</p>
+          <button 
+            (click)="cargarVistas()" 
+            class="mt-2 px-4 py-1 bg-red-800 text-white rounded hover:bg-red-700 transition-colors">
+            Reintentar
+          </button>
+        </div>
+      </div>
+      
+      <!-- Contenido cuando está cargado -->
+      <div *ngIf="!loading && !error" class="px-4 sm:px-0">
+        <!-- Selección de vista con tabs -->
+        <div class="mb-6 border-b border-restaurant-gold-800/30">
+          <div class="flex flex-wrap -mb-px">
+            <ng-container *ngIf="(vistas$ | async) as vistas">
+              <button 
+                *ngFor="let vista of vistas" 
+                (click)="seleccionarVista(vista.id)"
+                class="mr-2 py-2 px-4 text-center border-b-2 font-medium text-sm focus:outline-none transition-colors duration-200"
+                [ngClass]="vista.id === vistaSeleccionada ? 
+                  'border-restaurant-gold-500 text-restaurant-gold-400' : 
+                  'border-transparent text-gray-400 hover:text-restaurant-gold-300 hover:border-restaurant-gold-800/50'">
+                {{ vista.nombre }}
+              </button>
+            </ng-container>
+          </div>
+        </div>
+        
+        <!-- Contenido específico de la vista seleccionada -->
+        <div *ngIf="vistaSeleccionada === 'dia'" class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
+          <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Menú del Día</h2>
+          <p class="text-gray-400 mb-4">
+            Aquí puedes gestionar el menú del día, las tapas y las raciones.
+          </p>
+          
+          <!-- Tabs para las subsecciones -->
+          <div class="border-b border-restaurant-gold-800/30 mb-6">
+            <div class="flex flex-wrap -mb-px">
+              <button class="mr-2 py-2 px-4 text-center border-b-2 border-restaurant-gold-500 text-restaurant-gold-400 font-medium text-sm">
+                Menú del Día
+              </button>
+              <button class="mr-2 py-2 px-4 text-center border-b-2 border-transparent text-gray-400 hover:text-restaurant-gold-300 hover:border-restaurant-gold-800/50 font-medium text-sm">
+                Tapas
+              </button>
+              <button class="mr-2 py-2 px-4 text-center border-b-2 border-transparent text-gray-400 hover:text-restaurant-gold-300 hover:border-restaurant-gold-800/50 font-medium text-sm">
+                Raciones
+              </button>
+            </div>
+          </div>
+          
+          <!-- Contenido de edición (placeholder) -->
+          <div class="bg-restaurant-black/50 p-6 rounded-lg border border-restaurant-gold-800/30">
+            <p class="text-gray-400 text-center">
+              Aquí irá el formulario para editar el menú del día, tapas y raciones.
+            </p>
+          </div>
+        </div>
+        
+        <div *ngIf="vistaSeleccionada === 'eventos'" class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
+          <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Eventos</h2>
+          <p class="text-gray-400 mb-4">
+            Gestiona las escenas de eventos y promociones que se mostrarán en los televisores.
+          </p>
+          
+          <!-- Contenido de edición (placeholder) -->
+          <div class="bg-restaurant-black/50 p-6 rounded-lg border border-restaurant-gold-800/30">
+            <p class="text-gray-400 text-center">
+              Aquí irá el editor de escenas de eventos.
+            </p>
+          </div>
+        </div>
+        
+        <div *ngIf="vistaSeleccionada === 'carta'" class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
+          <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Carta</h2>
+          <p class="text-gray-400 mb-4">
+            Gestiona las diferentes secciones de la carta del restaurante.
+          </p>
+          
+          <!-- Contenido de edición (placeholder) -->
+          <div class="bg-restaurant-black/50 p-6 rounded-lg border border-restaurant-gold-800/30">
+            <p class="text-gray-400 text-center">
+              Aquí irá el editor de secciones de la carta.
+            </p>
+          </div>
+        </div>
+        
+        <div *ngIf="vistaSeleccionada === 'menu'" class="bg-restaurant-dark border border-restaurant-gold-800/50 rounded-lg p-6">
+          <h2 class="text-2xl font-bold text-restaurant-gold-400 mb-6">Menú</h2>
+          <p class="text-gray-400 mb-4">
+            Gestiona la vista de menú completo con todas sus secciones.
+          </p>
+          
+          <!-- Contenido de edición (placeholder) -->
+          <div class="bg-restaurant-black/50 p-6 rounded-lg border border-restaurant-gold-800/30">
+            <p class="text-gray-400 text-center">
+              Aquí irá el editor del menú completo.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
