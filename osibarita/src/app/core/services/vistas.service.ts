@@ -1,7 +1,7 @@
 // src/app/core/services/vistas.service.ts
 import { Injectable } from '@angular/core';
 import { FirestoreService } from './firestore.service';
-import { Vista, ConfiguracionTV, MenuItem, Escena } from '../../models';
+import { Vista, ConfiguracionTV, MenuItem, Escena, MenuDia, MenuDiaItem } from '../../models';
 import { Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
@@ -79,16 +79,74 @@ export class VistasService {
       );
   }
 
-  // Obtener menú del día
-  getMenuDia(): Observable<MenuItem[]> {
-    return this.firestoreService.getCollection<MenuItem>('vistas/dia/menu')
+  // Obtener información del menú del día
+  getMenuDiaInfo(): Observable<MenuDia> {
+    return this.firestoreService.getDocObservable<MenuDia>('vistas/dia/menu', 'info')
       .pipe(
-        tap(menu => console.log('Menú cargado:', menu)),
+        tap(info => console.log('Información del menú del día cargada:', info)),
         catchError(error => {
-          console.error('Error al cargar menú:', error);
+          console.error('Error al cargar información del menú del día:', error);
+          // Retornar un objeto por defecto en caso de error
+          return of({
+            fecha: new Date(),
+            precio: 0,
+            descripcion: 'Información no disponible',
+            disponible: false
+          } as MenuDia);
+        })
+      );
+  }
+  
+  // Obtener platos del menú del día
+  getMenuDiaPlatos(): Observable<MenuDiaItem[]> {
+    return this.firestoreService.getCollection<MenuDiaItem>('vistas/dia/platos')
+      .pipe(
+        tap(platos => console.log('Platos del menú del día cargados:', platos)),
+        catchError(error => {
+          console.error('Error al cargar platos del menú del día:', error);
           return of([]);
         })
       );
+  }
+  
+  // Actualizar información del menú del día
+  async updateMenuDiaInfo(data: Partial<MenuDia>): Promise<void> {
+    try {
+      return this.firestoreService.updateDoc('vistas/dia/menu', 'info', data);
+    } catch (error) {
+      console.error('Error al actualizar información del menú del día:', error);
+      throw error;
+    }
+  }
+  
+  // Agregar un plato al menú del día
+  async addMenuDiaPlato(plato: MenuDiaItem): Promise<string> {
+    try {
+      return this.firestoreService.addDoc('vistas/dia/platos', plato);
+    } catch (error) {
+      console.error('Error al agregar plato al menú del día:', error);
+      throw error;
+    }
+  }
+  
+  // Actualizar un plato del menú del día
+  async updateMenuDiaPlato(id: string, data: Partial<MenuDiaItem>): Promise<void> {
+    try {
+      return this.firestoreService.updateDoc('vistas/dia/platos', id, data);
+    } catch (error) {
+      console.error('Error al actualizar plato del menú del día:', error);
+      throw error;
+    }
+  }
+  
+  // Eliminar un plato del menú del día
+  async deleteMenuDiaPlato(id: string): Promise<void> {
+    try {
+      return this.firestoreService.deleteDoc('vistas/dia/platos', id);
+    } catch (error) {
+      console.error('Error al eliminar plato del menú del día:', error);
+      throw error;
+    }
   }
 
   // Obtener escenas de eventos

@@ -80,6 +80,21 @@
           class="px-4 py-2 bg-restaurant-gold-800 text-white rounded hover:bg-restaurant-gold-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           Inicializar Datos Mock
         </button>
+        <div class="mt-4">
+          <h3 class="text-lg text-restaurant-gold-400 mb-2">Menú del Día</h3>
+          <p class="mb-4" *ngIf="!menuDiaInitialized">
+            Si tienes problemas específicos con el menú del día, puedes reinicializarlo manualmente.
+          </p>
+          <p class="mb-4 text-green-400" *ngIf="menuDiaInitialized">
+            ¡Menú del día reinicializado correctamente!
+          </p>
+          <button 
+            (click)="resetMenuDia()" 
+            [disabled]="loading"
+            class="px-4 py-2 bg-restaurant-gold-800 text-white rounded hover:bg-restaurant-gold-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            Reinicializar Menú del Día
+          </button>
+        </div>
       </div>
     </div>
   </div>

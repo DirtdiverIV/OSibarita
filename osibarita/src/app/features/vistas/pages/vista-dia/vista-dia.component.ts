@@ -1,8 +1,8 @@
 // src/app/features/vistas/pages/vista-dia/vista-dia.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { VistasService } from '../../../../core/services/vistas.service';
-import { MenuItem } from '../../../../models';
-import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
+import { MenuItem, MenuDia, MenuDiaItem } from '../../../../models';
+import { BehaviorSubject, Observable, Subscription, of, combineLatest } from 'rxjs';
 import { catchError, finalize, map, tap } from 'rxjs/operators';
 
 @Component({
@@ -14,12 +14,15 @@ export class VistaDiaComponent implements OnInit, OnDestroy {
   // Observables con datos
   tapas$: Observable<MenuItem[]> = of([]);
   raciones$: Observable<MenuItem[]> = of([]);
-  menuItems$: Observable<MenuItem[]> = of([]);
   
-  // Categorías del menú como BehaviorSubjects para actualización reactiva
-  primeros: MenuItem[] = [];
-  segundos: MenuItem[] = [];
-  postres: MenuItem[] = [];
+  // Menú del día
+  menuInfo$: Observable<MenuDia> = of({} as MenuDia);
+  menuPlatos$: Observable<MenuDiaItem[]> = of([]);
+  
+  // Categorías del menú como arrays para la vista
+  primeros: MenuDiaItem[] = [];
+  segundos: MenuDiaItem[] = [];
+  postres: MenuDiaItem[] = [];
 
   // Estados de carga
   loading = true;
@@ -71,38 +74,68 @@ export class VistaDiaComponent implements OnInit, OnDestroy {
         })
       );
       
-      // Cargar menú y filtrar por categorías con manejo de errores
-      this.menuItems$ = this.vistasService.getMenuDia().pipe(
-        tap(menu => {
-          console.log('Menú cargado correctamente:', menu);
+      // Cargar información del menú del día
+      this.menuInfo$ = this.vistasService.getMenuDiaInfo().pipe(
+        tap(info => {
+          console.log('Información del menú del día cargada correctamente:', info);
         }),
         catchError(err => {
-          console.error('Error al cargar menú:', err);
-          this.handleError('Error al cargar menú', err);
+          console.error('Error al cargar información del menú del día:', err);
+          this.handleError('Error al cargar información del menú', err);
+          return of({} as MenuDia);
+        })
+      );
+      
+      // Cargar platos del menú del día
+      this.menuPlatos$ = this.vistasService.getMenuDiaPlatos().pipe(
+        tap(platos => {
+          console.log('Platos del menú del día cargados correctamente:', platos);
+        }),
+        catchError(err => {
+          console.error('Error al cargar platos del menú del día:', err);
+          this.handleError('Error al cargar platos del menú', err);
           return of([]);
         })
       );
       
-      // Suscribirse para procesar los items del menú por categorías
+      // Suscribirse para procesar los platos del menú por categorías
       this.subscription.add(
-        this.menuItems$.subscribe({
-          next: (items) => {
-            console.log('Items del menú recibidos:', items);
+        this.menuPlatos$.subscribe({
+          next: (platos) => {
+            console.log('Platos del menú recibidos:', platos);
             
-            // Categorizar los ítems del menú
-            this.primeros = items.filter(item => item.category === 'primeros');
-            this.segundos = items.filter(item => item.category === 'segundos');
-            this.postres = items.filter(item => item.category === 'postres');
+            // Categorizar los platos del menú
+            this.primeros = platos.filter(plato => plato.category === 'primeros');
+            this.segundos = platos.filter(plato => plato.category === 'segundos');
+            this.postres = platos.filter(plato => plato.category === 'postres');
             
             this.loading = false;
           },
           error: (err) => {
-            console.error('Error en la suscripción del menú:', err);
+            console.error('Error en la suscripción de platos del menú:', err);
             this.handleError('Error al procesar menú', err);
             this.loading = false;
           },
           complete: () => {
-            console.log('Suscripción al menú completada');
+            console.log('Suscripción a platos del menú completada');
+          }
+        })
+      );
+      
+      // Usando combineLatest para determinar cuando todas las cargas están completas
+      this.subscription.add(
+        combineLatest([
+          this.tapas$,
+          this.raciones$,
+          this.menuInfo$,
+          this.menuPlatos$
+        ]).subscribe({
+          next: () => {
+            this.loading = false;
+          },
+          error: (err) => {
+            console.error('Error en la carga de datos:', err);
+            this.loading = false;
           }
         })
       );

@@ -31,33 +31,73 @@
   
   <div class="max-w-7xl mx-auto relative z-10">
     <div class="text-center mb-10">
-      <h1 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient">Menú del Día</h1>
+      <h1 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient">Nuestras Especialidades</h1>
       <div class="h-1 w-32 bg-gold-gradient mx-auto mt-2 rounded-full shadow-gold"></div>
       <p class="text-gray-400 mt-2 italic">Selección especial de nuestro chef</p>
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <!-- Menú del día -->
-      <app-restaurant-card title="Menú del Día">
-        <!-- Mensaje si no hay elementos -->
-        <div *ngIf="primeros.length === 0 && segundos.length === 0 && postres.length === 0 && !loading" 
-             class="py-8 text-center text-gray-500">
-          No hay elementos disponibles en el menú del día.
-        </div>
-        
-        <div *ngIf="primeros.length > 0" class="mb-6">
-          <h4 class="text-xl text-restaurant-gold-400 mb-3 border-b border-restaurant-gold-600/30 pb-2">Primeros</h4>
-          <app-menu-item-card *ngFor="let item of primeros" [item]="item"></app-menu-item-card>
-        </div>
-        
-        <div *ngIf="segundos.length > 0" class="mb-6">
-          <h4 class="text-xl text-restaurant-gold-400 mb-3 border-b border-restaurant-gold-600/30 pb-2">Segundos</h4>
-          <app-menu-item-card *ngFor="let item of segundos" [item]="item"></app-menu-item-card>
-        </div>
-        
-        <div *ngIf="postres.length > 0">
-          <h4 class="text-xl text-restaurant-gold-400 mb-3 border-b border-restaurant-gold-600/30 pb-2">Postres</h4>
-          <app-menu-item-card *ngFor="let item of postres" [item]="item"></app-menu-item-card>
+      <!-- Menú del día (nuevo formato) -->
+      <app-restaurant-card>
+        <div *ngIf="(menuInfo$ | async) as menuInfo" class="relative">
+          <!-- Cabecera del menú del día -->
+          <div class="text-center mb-6">
+            <h2 class="text-2xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient">Menú del Día</h2>
+            <div *ngIf="menuInfo.fecha" class="text-gray-400 text-sm">
+              {{ menuInfo.fecha | date:'fullDate':'':'es' }}
+            </div>
+            
+            <!-- Precio del menú -->
+            <div class="mt-3 text-2xl text-transparent bg-clip-text bg-gold-gradient font-bold">
+              {{ menuInfo.precio | currency:'EUR':'symbol':'1.2-2' }}
+            </div>
+            
+            <!-- Descripción del menú -->
+            <div *ngIf="menuInfo.descripcion" class="mt-2 text-sm text-gray-400 italic">
+              {{ menuInfo.descripcion }}
+            </div>
+            
+            <!-- Indicador de disponibilidad -->
+            <div *ngIf="menuInfo.disponible" class="mt-3 inline-block px-3 py-1 bg-green-900/30 text-green-400 text-xs rounded-full border border-green-700">
+              Disponible hoy
+            </div>
+            <div *ngIf="!menuInfo.disponible" class="mt-3 inline-block px-3 py-1 bg-red-900/30 text-red-400 text-xs rounded-full border border-red-700">
+              No disponible
+            </div>
+          </div>
+          
+          <!-- Línea decorativa -->
+          <div class="h-px w-full bg-gradient-to-r from-transparent via-restaurant-gold-500/30 to-transparent my-4"></div>
+          
+          <!-- Mensaje si no hay elementos -->
+          <div *ngIf="primeros.length === 0 && segundos.length === 0 && postres.length === 0 && !loading" 
+               class="py-8 text-center text-gray-500">
+            No hay elementos disponibles en el menú del día.
+          </div>
+          
+          <div *ngIf="primeros.length > 0" class="mb-6">
+            <h4 class="text-xl text-restaurant-gold-400 mb-3 border-b border-restaurant-gold-600/30 pb-2">Primeros Platos</h4>
+            <div *ngFor="let item of primeros" class="p-3 border-b border-gray-800/50 hover:bg-restaurant-gold-900/10 transition-all duration-300 group relative">
+              <h5 class="text-lg font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">{{ item.name }}</h5>
+              <p class="text-sm text-gray-400 mt-1">{{ item.description }}</p>
+            </div>
+          </div>
+          
+          <div *ngIf="segundos.length > 0" class="mb-6">
+            <h4 class="text-xl text-restaurant-gold-400 mb-3 border-b border-restaurant-gold-600/30 pb-2">Segundos Platos</h4>
+            <div *ngFor="let item of segundos" class="p-3 border-b border-gray-800/50 hover:bg-restaurant-gold-900/10 transition-all duration-300 group relative">
+              <h5 class="text-lg font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">{{ item.name }}</h5>
+              <p class="text-sm text-gray-400 mt-1">{{ item.description }}</p>
+            </div>
+          </div>
+          
+          <div *ngIf="postres.length > 0">
+            <h4 class="text-xl text-restaurant-gold-400 mb-3 border-b border-restaurant-gold-600/30 pb-2">Postres</h4>
+            <div *ngFor="let item of postres" class="p-3 border-b border-gray-800/50 hover:bg-restaurant-gold-900/10 transition-all duration-300 group relative">
+              <h5 class="text-lg font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">{{ item.name }}</h5>
+              <p class="text-sm text-gray-400 mt-1">{{ item.description }}</p>
+            </div>
+          </div>
         </div>
       </app-restaurant-card>
       

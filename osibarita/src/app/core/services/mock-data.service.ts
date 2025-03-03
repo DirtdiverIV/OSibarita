@@ -1,7 +1,7 @@
 // src/app/core/services/mock-data.service.ts
 import { Injectable } from '@angular/core';
 import { FirestoreService } from './firestore.service';
-import { MenuItem, Vista, ConfiguracionTV, Escena } from '../../models';
+import { MenuItem, Vista, ConfiguracionTV, Escena, MenuDia, MenuDiaItem } from '../../models';
 import { 
   Firestore, 
   doc, 
@@ -104,6 +104,7 @@ export class MockDataService {
       await this.limpiarColeccion('vistas/dia/tapas');
       await this.limpiarColeccion('vistas/dia/raciones');
       await this.limpiarColeccion('vistas/dia/menu');
+      await this.limpiarColeccion('vistas/dia/platos');
       
       // Tapas
       const tapas: MenuItem[] = [
@@ -129,7 +130,7 @@ export class MockDataService {
           category: 'tapas'
         }
       ];
-
+  
       // Raciones
       const raciones: MenuItem[] = [
         {
@@ -154,57 +155,59 @@ export class MockDataService {
           category: 'raciones'
         }
       ];
-
-      // Menú del día
-      const menuDia: MenuItem[] = [
+  
+      // Menú del día (nuevo formato sin precios individuales)
+      const platosMenuDia: MenuDiaItem[] = [
         {
           id: 'menuPrimero1',
           name: 'Ensalada Mixta',
           description: 'Lechuga, tomate, cebolla, atún y huevo',
-          price: 6.0,
           category: 'primeros'
         },
         {
           id: 'menuPrimero2',
           name: 'Sopa de Pescado',
           description: 'Sopa casera con pescado de roca',
-          price: 7.0,
           category: 'primeros'
         },
         {
           id: 'menuSegundo1',
           name: 'Merluza a la Romana',
           description: 'Merluza fresca rebozada con ensalada',
-          price: 12.0,
           category: 'segundos'
         },
         {
           id: 'menuSegundo2',
           name: 'Entrecot de Ternera',
           description: 'Entrecot de ternera con patatas fritas',
-          price: 14.0,
           category: 'segundos'
         },
         {
           id: 'menuPostre1',
           name: 'Flan Casero',
           description: 'Flan con caramelo y nata',
-          price: 4.0,
           category: 'postres'
         },
         {
           id: 'menuPostre2',
           name: 'Fruta del Tiempo',
           description: 'Selección de frutas de temporada',
-          price: 3.5,
           category: 'postres'
         }
       ];
-
+  
+      // Información del menú del día
+      const menuDiaInfo: MenuDia = {
+        id: 'menuDiaActual',
+        fecha: new Date(),
+        precio: 15.95,
+        descripcion: 'Menú del día incluye primer plato, segundo plato, postre, pan y bebida',
+        disponible: true
+      };
+  
       // Inicializar en Firestore con operaciones directas
       const batchTapas = writeBatch(this.firestore);
       for (const tapa of tapas) {
-        // Verificamos que id existe y es un string
         if (tapa.id) {
           const docRef = doc(this.firestore, 'vistas/dia/tapas', tapa.id);
           batchTapas.set(docRef, tapa);
@@ -214,7 +217,6 @@ export class MockDataService {
       
       const batchRaciones = writeBatch(this.firestore);
       for (const racion of raciones) {
-        // Verificamos que id existe y es un string
         if (racion.id) {
           const docRef = doc(this.firestore, 'vistas/dia/raciones', racion.id);
           batchRaciones.set(docRef, racion);
@@ -222,15 +224,18 @@ export class MockDataService {
       }
       await batchRaciones.commit();
       
-      const batchMenu = writeBatch(this.firestore);
-      for (const item of menuDia) {
-        // Verificamos que id existe y es un string
-        if (item.id) {
-          const docRef = doc(this.firestore, 'vistas/dia/menu', item.id);
-          batchMenu.set(docRef, item);
+      // Guardar la información principal del menú del día
+      await setDoc(doc(this.firestore, 'vistas/dia/menu', 'info'), menuDiaInfo);
+      
+      // Guardar los platos del menú del día
+      const batchMenuPlatos = writeBatch(this.firestore);
+      for (const plato of platosMenuDia) {
+        if (plato.id) {
+          const docRef = doc(this.firestore, 'vistas/dia/platos', plato.id);
+          batchMenuPlatos.set(docRef, plato);
         }
       }
-      await batchMenu.commit();
+      await batchMenuPlatos.commit();
       
       console.log('Items del menú inicializados correctamente');
     } catch (error) {
@@ -432,6 +437,82 @@ export class MockDataService {
     await batchCarta.commit();
     
     console.log('Carta inicializada correctamente');
+  }
+
+  async resetMenuDia() {
+    try {
+      // Limpiar las colecciones necesarias
+      await this.limpiarColeccion('vistas/dia/menu');
+      await this.limpiarColeccion('vistas/dia/platos');
+      
+      // Menú del día (sin precios individuales)
+      const platosMenuDia: MenuDiaItem[] = [
+        {
+          id: 'menuPrimero1',
+          name: 'Ensalada Mixta',
+          description: 'Lechuga, tomate, cebolla, atún y huevo',
+          category: 'primeros'
+        },
+        {
+          id: 'menuPrimero2',
+          name: 'Sopa de Pescado',
+          description: 'Sopa casera con pescado de roca',
+          category: 'primeros'
+        },
+        {
+          id: 'menuSegundo1',
+          name: 'Merluza a la Romana',
+          description: 'Merluza fresca rebozada con ensalada',
+          category: 'segundos'
+        },
+        {
+          id: 'menuSegundo2',
+          name: 'Entrecot de Ternera',
+          description: 'Entrecot de ternera con patatas fritas',
+          category: 'segundos'
+        },
+        {
+          id: 'menuPostre1',
+          name: 'Flan Casero',
+          description: 'Flan con caramelo y nata',
+          category: 'postres'
+        },
+        {
+          id: 'menuPostre2',
+          name: 'Fruta del Tiempo',
+          description: 'Selección de frutas de temporada',
+          category: 'postres'
+        }
+      ];
+  
+      // Información del menú del día
+      const menuDiaInfo: MenuDia = {
+        id: 'info',
+        fecha: new Date(),
+        precio: 15.95,
+        descripcion: 'Menú del día incluye primer plato, segundo plato, postre, pan y bebida',
+        disponible: true
+      };
+  
+      // Guardar la información principal del menú del día
+      await setDoc(doc(this.firestore, 'vistas/dia/menu', 'info'), menuDiaInfo);
+      
+      // Guardar los platos del menú del día
+      const batchMenuPlatos = writeBatch(this.firestore);
+      for (const plato of platosMenuDia) {
+        if (plato.id) {
+          const docRef = doc(this.firestore, 'vistas/dia/platos', plato.id);
+          batchMenuPlatos.set(docRef, plato);
+        }
+      }
+      await batchMenuPlatos.commit();
+      
+      console.log('Menú del día reinicializado correctamente');
+      return true;
+    } catch (error) {
+      console.error('Error al reinicializar menú del día:', error);
+      throw error;
+    }
   }
 
   // Inicializar configuración de TVs

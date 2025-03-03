@@ -14,6 +14,7 @@ export class DiagnosticoComponent implements OnInit {
   loading = false;
   errorMessage = '';
   mockDataInitialized = false;
+  menuDiaInitialized = false;
 
   constructor(
     private firebaseDiagnosticService: FirebaseDiagnosticService,
@@ -39,6 +40,21 @@ export class DiagnosticoComponent implements OnInit {
     }
   }
 
+  async resetMenuDia() {
+    this.loading = true;
+    try {
+      await this.mockDataService.resetMenuDia();
+      this.menuDiaInitialized = true;
+      // Volver a comprobar colecciones después de inicializar datos
+      await this.checkCollections();
+    } catch (error) {
+      console.error('Error al reinicializar el menú del día:', error);
+      this.errorMessage = 'Error al reinicializar el menú del día: ' + error;
+    } finally {
+      this.loading = false;
+    }
+  }
+
   async checkCollections() {
     this.loading = true;
     try {
@@ -50,6 +66,8 @@ export class DiagnosticoComponent implements OnInit {
       this.loading = false;
     }
   }
+
+  
 
   async initializeMockData() {
     this.loading = true;
