@@ -10,6 +10,7 @@ import { AppComponent } from './app.component';
 // Servicios y módulos propios
 import { AppInitializerService } from './core/services/app-initializer.service';
 import { FirebaseModule } from './core/firebase/firebase.module';
+import { HomeModule } from './features/home/home.module';
 
 // Factory para inicializar la aplicación
 export function initializeAppFactory(appInitializer: AppInitializerService) {
@@ -25,7 +26,8 @@ export function initializeAppFactory(appInitializer: AppInitializerService) {
     BrowserAnimationsModule,
     RouterModule,
     AppRoutingModule,
-    FirebaseModule
+    FirebaseModule,
+    HomeModule
   ],
   providers: [
     // Inicializador de la aplicación

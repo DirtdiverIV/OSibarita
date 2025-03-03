@@ -2,7 +2,8 @@
 import { Injectable } from '@angular/core';
 import { 
   Firestore, 
-  collection, 
+  collection,
+  query,
   doc, 
   addDoc, 
   setDoc, 
@@ -10,15 +11,12 @@ import {
   deleteDoc, 
   getDoc, 
   getDocs, 
-  query, 
   where, 
   onSnapshot, 
-  collectionData,
-  DocumentReference,
-  CollectionReference 
+  collectionData
 } from '@angular/fire/firestore';
-import { Observable, from, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable, from, throwError, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -29,13 +27,40 @@ export class FirestoreService {
 
   // Obtener colección con actualizaciones en tiempo real
   getCollection<T>(collectionPath: string): Observable<T[]> {
+    console.log(`Obteniendo colección: ${collectionPath}`);
+    
     try {
-      console.log(`Obteniendo colección: ${collectionPath}`);
+      // Usamos un enfoque diferente para resolver el problema del tipo
       const collectionRef = collection(this.firestore, collectionPath);
-      return collectionData(collectionRef, { idField: 'id' }) as Observable<T[]>;
+      const q = query(collectionRef);
+      
+      // Crear observable manualmente en lugar de usar collectionData
+      return new Observable<T[]>(observer => {
+        const unsubscribe = onSnapshot(q, 
+          (querySnapshot) => {
+            const items: T[] = [];
+            querySnapshot.forEach((doc) => {
+              items.push({ id: doc.id, ...doc.data() } as T);
+            });
+            observer.next(items);
+          },
+          (error) => {
+            console.error(`Error en getCollection para ${collectionPath}:`, error);
+            observer.error(error);
+          }
+        );
+        
+        // Cleanup function
+        return { unsubscribe };
+      }).pipe(
+        catchError(error => {
+          console.error(`Error al obtener colección ${collectionPath}:`, error);
+          return of([] as T[]); // Retornar un array vacío en caso de error
+        })
+      );
     } catch (error) {
-      console.error(`Error al obtener colección ${collectionPath}:`, error);
-      return throwError(() => new Error(`Error al obtener colección ${collectionPath}: ${error}`));
+      console.error(`Error al configurar observable para colección ${collectionPath}:`, error);
+      return of([] as T[]); // Retornar un array vacío en caso de error
     }
   }
 
@@ -54,7 +79,7 @@ export class FirestoreService {
       }
     } catch (error) {
       console.error(`Error al obtener documento ${collectionPath}/${id}:`, error);
-      throw new Error(`Error al obtener documento ${collectionPath}/${id}: ${error}`);
+      throw error;
     }
   }
 
@@ -68,7 +93,7 @@ export class FirestoreService {
       return docRef.id;
     } catch (error) {
       console.error(`Error al añadir documento a ${collectionPath}:`, error);
-      throw new Error(`Error al añadir documento a ${collectionPath}: ${error}`);
+      throw error;
     }
   }
 
@@ -81,7 +106,7 @@ export class FirestoreService {
       console.log(`Documento establecido correctamente: ${collectionPath}/${id}`);
     } catch (error) {
       console.error(`Error al establecer documento ${collectionPath}/${id}:`, error);
-      throw new Error(`Error al establecer documento ${collectionPath}/${id}: ${error}`);
+      throw error;
     }
   }
 
@@ -94,7 +119,7 @@ export class FirestoreService {
       console.log(`Documento actualizado correctamente: ${collectionPath}/${id}`);
     } catch (error) {
       console.error(`Error al actualizar documento ${collectionPath}/${id}:`, error);
-      throw new Error(`Error al actualizar documento ${collectionPath}/${id}: ${error}`);
+      throw error;
     }
   }
 
@@ -107,36 +132,48 @@ export class FirestoreService {
       console.log(`Documento eliminado correctamente: ${collectionPath}/${id}`);
     } catch (error) {
       console.error(`Error al eliminar documento ${collectionPath}/${id}:`, error);
-      throw new Error(`Error al eliminar documento ${collectionPath}/${id}: ${error}`);
+      throw error;
     }
   }
 
   // Obtener actualización en tiempo real de un documento
   getDocObservable<T>(collectionPath: string, id: string): Observable<T> {
     console.log(`Observando documento: ${collectionPath}/${id}`);
-    const docRef = doc(this.firestore, collectionPath, id);
     
-    return new Observable<T>(observer => {
-      const unsubscribe = onSnapshot(docRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const data = { id: snapshot.id, ...snapshot.data() } as T;
-          observer.next(data);
-        } else {
-          observer.error(`Documento no encontrado: ${collectionPath}/${id}`);
-        }
-      }, (error) => {
-        console.error(`Error al observar documento ${collectionPath}/${id}:`, error);
-        observer.error(error);
-      });
+    try {
+      const docRef = doc(this.firestore, collectionPath, id);
       
-      // Cleanup function
-      return { unsubscribe };
-    }).pipe(
-      catchError(error => {
-        console.error(`Error en observable de documento ${collectionPath}/${id}:`, error);
-        return throwError(() => error);
-      })
-    );
+      return new Observable<T>(observer => {
+        const unsubscribe = onSnapshot(docRef, 
+          (docSnapshot) => {
+            if (docSnapshot.exists()) {
+              const data = { id: docSnapshot.id, ...docSnapshot.data() } as T;
+              observer.next(data);
+            } else {
+              // Si el documento no existe, retornamos un objeto vacío en lugar de error
+              // para evitar que se rompa la suscripción
+              console.warn(`Documento no encontrado: ${collectionPath}/${id}`);
+              observer.next({} as T);
+            }
+          },
+          (error) => {
+            console.error(`Error al observar documento ${collectionPath}/${id}:`, error);
+            observer.error(error);
+          }
+        );
+        
+        // Cleanup function
+        return { unsubscribe };
+      }).pipe(
+        catchError(error => {
+          console.error(`Error en observable de documento ${collectionPath}/${id}:`, error);
+          return of({} as T); // Retornar un objeto vacío en caso de error
+        })
+      );
+    } catch (error) {
+      console.error(`Error al configurar observable para documento ${collectionPath}/${id}:`, error);
+      return of({} as T); // Retornar un objeto vacío en caso de error
+    }
   }
 
   // Obtener documentos filtrados por campo
@@ -156,7 +193,7 @@ export class FirestoreService {
       return results;
     } catch (error) {
       console.error(`Error al buscar documentos en ${collectionPath} por campo ${field}:`, error);
-      throw new Error(`Error al buscar documentos en ${collectionPath} por campo ${field}: ${error}`);
+      return [];
     }
   }
 
@@ -164,20 +201,20 @@ export class FirestoreService {
   async initializeCollection(collectionPath: string, documents: any[]): Promise<void> {
     try {
       console.log(`Inicializando colección ${collectionPath} con ${documents.length} documentos`);
-      for (const doc of documents) {
-        if (doc.id) {
-          const id = doc.id;
-          const docData = { ...doc };
-          delete docData.id;
-          await this.setDoc(collectionPath, id, docData);
+      for (const docData of documents) {
+        if (docData.id) {
+          const id = docData.id;
+          const data = { ...docData };
+          delete data.id;
+          await this.setDoc(collectionPath, id, data);
         } else {
-          await this.addDoc(collectionPath, doc);
+          await this.addDoc(collectionPath, docData);
         }
       }
       console.log(`Colección ${collectionPath} inicializada correctamente`);
     } catch (error) {
       console.error(`Error al inicializar colección ${collectionPath}:`, error);
-      throw new Error(`Error al inicializar colección ${collectionPath}: ${error}`);
+      throw error;
     }
   }
 }

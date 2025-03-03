@@ -1,6 +1,7 @@
 // src/app/app-routing.module.ts
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { HomeComponent } from './features/home/pages/home/home.component';
 
 const routes: Routes = [
   {
@@ -15,8 +16,9 @@ const routes: Routes = [
     path: 'tv',
     loadChildren: () => import('./features/vistas/vistas.module').then(m => m.VistasModule)
   },
-  { path: '', redirectTo: '/tv', pathMatch: 'full' },
-  { path: '**', redirectTo: '/tv' }
+  { path: 'home', component: HomeComponent },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: '**', redirectTo: '/home' }
 ];
 
 @NgModule({

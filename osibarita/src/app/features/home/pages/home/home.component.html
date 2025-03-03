@@ -1,0 +1,64 @@
+<!-- src/app/features/home/pages/home/home.component.html -->
+<div class="min-h-screen w-full bg-restaurant-black text-white flex flex-col">
+    <!-- Header con logo o título -->
+    <header class="py-8 text-center">
+      <h1 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient">
+        Restaurante Sibarita
+      </h1>
+      <div class="h-1 w-48 bg-gold-gradient mx-auto mt-2 rounded-full shadow-gold"></div>
+      <p class="text-gray-400 mt-2">Sistema de visualización de TVs</p>
+    </header>
+  
+    <!-- Contenido principal -->
+    <main class="flex-1 flex flex-col items-center justify-center p-6">
+      <div class="w-full max-w-4xl">
+        <!-- Sección de TVs -->
+        <app-restaurant-card title="Pantallas de TV">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div *ngFor="let tv of [1, 2, 3, 4]" class="p-4">
+              <button 
+                (click)="navigateToTV(tv)" 
+                class="w-full h-32 bg-restaurant-dark border border-restaurant-gold-600/30 rounded-lg flex flex-col items-center justify-center transition-all duration-300 hover:border-restaurant-gold-500 hover:shadow-gold group">
+                <div class="text-4xl text-restaurant-gold-400 group-hover:text-restaurant-gold-300">
+                  {{ tv }}
+                </div>
+                <div class="mt-2 text-gray-400 group-hover:text-white">
+                  TV {{ tv }}
+                </div>
+              </button>
+            </div>
+          </div>
+        </app-restaurant-card>
+        
+        <!-- Sección de Admin y Diagnóstico -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          <app-restaurant-card title="Panel de Administración">
+            <p class="text-gray-400 mb-4">
+              Accede al panel para gestionar los contenidos que se mostrarán en las TVs.
+            </p>
+            <button 
+              (click)="navigateToAdmin()" 
+              class="w-full px-6 py-4 bg-gold-gradient text-black font-bold rounded-md transform hover:scale-105 transition-all duration-300 shadow-gold hover:shadow-gold-intense flex items-center justify-center">
+              <span class="text-lg">Administración</span>
+            </button>
+          </app-restaurant-card>
+          
+          <app-restaurant-card title="Diagnóstico">
+            <p class="text-gray-400 mb-4">
+              Herramientas de diagnóstico para comprobar la conexión con Firebase y los datos.
+            </p>
+            <button 
+              (click)="navigateToDiagnostic()" 
+              class="w-full px-6 py-4 bg-restaurant-dark border border-restaurant-gold-500 text-restaurant-gold-400 font-bold rounded-md transform hover:scale-105 transition-all duration-300 hover:bg-restaurant-gold-900/20 flex items-center justify-center">
+              <span class="text-lg">Diagnóstico</span>
+            </button>
+          </app-restaurant-card>
+        </div>
+      </div>
+    </main>
+  
+    <!-- Footer con información -->
+    <footer class="py-4 text-center text-gray-600 text-sm">
+      <div>© 2025 Restaurante Sibarita. Todos los derechos reservados.</div>
+    </footer>
+  </div>
