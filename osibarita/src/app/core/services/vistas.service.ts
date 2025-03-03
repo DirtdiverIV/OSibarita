@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { FirestoreService } from './firestore.service';
 import { Vista, ConfiguracionTV, MenuItem, Escena, MenuDia, MenuDiaItem } from '../../models';
 import { Observable, of } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -83,10 +83,16 @@ export class VistasService {
   getMenuDiaInfo(): Observable<MenuDia> {
     return this.firestoreService.getDocObservable<MenuDia>('vistas/dia/menu', 'info')
       .pipe(
+        map(info => ({
+          ...info,
+          // Si info.fecha es un Timestamp de Firestore, se convierte a Date
+          fecha: (info.fecha && typeof (info.fecha as any).toDate === 'function')
+            ? (info.fecha as any).toDate()
+            : info.fecha
+        })),
         tap(info => console.log('Información del menú del día cargada:', info)),
         catchError(error => {
           console.error('Error al cargar información del menú del día:', error);
-          // Retornar un objeto por defecto en caso de error
           return of({
             fecha: new Date(),
             precio: 0,

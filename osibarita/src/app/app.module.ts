@@ -1,5 +1,5 @@
 // src/app/app.module.ts
-import { NgModule, APP_INITIALIZER } from '@angular/core';
+import { NgModule, APP_INITIALIZER, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
@@ -36,7 +36,8 @@ export function initializeAppFactory(appInitializer: AppInitializerService) {
       useFactory: initializeAppFactory,
       deps: [AppInitializerService],
       multi: true
-    }
+    },
+    { provide: LOCALE_ID, useValue: 'es' }
   ],
   bootstrap: [AppComponent]
 })

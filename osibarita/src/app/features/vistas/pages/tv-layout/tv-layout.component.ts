@@ -63,7 +63,11 @@ export class TvLayoutComponent implements OnInit, OnDestroy {
 
   private navegarAVistaActual(): void {
     if (this.configuracion && this.configuracion.vista) {
-      this.router.navigate(['/tv', this.configuracion.vista]);
+      const targetUrl = `/tv/${this.configuracion.vista}`;
+      // Solo navega si la URL actual es diferente a la de destino.
+      if (this.router.url !== targetUrl) {
+        this.router.navigate([targetUrl]);
+      }
     }
   }
 

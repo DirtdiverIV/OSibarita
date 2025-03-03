@@ -1,1 +1,151 @@
-<p>vista-menu works!</p>
+<!-- src/app/features/vistas/pages/vista-menu/vista-menu.component.html -->
+<div class="w-full h-full bg-restaurant-black text-white overflow-hidden relative">
+    <!-- Fondo elegante con gradiente sutil -->
+    <div class="absolute inset-0 opacity-5 mix-blend-overlay bg-gradient-to-br from-gray-900 to-black"></div>
+    
+    <!-- Decoración lateral -->
+    <div class="absolute left-0 top-0 w-1 h-full bg-gold-gradient opacity-30"></div>
+    <div class="absolute right-0 top-0 w-1 h-full bg-gold-gradient opacity-30"></div>
+    
+    <!-- Estado de carga -->
+    <div *ngIf="loading" class="absolute inset-0 flex items-center justify-center z-20 bg-black bg-opacity-70">
+      <div class="text-center">
+        <div class="w-16 h-16 border-4 border-restaurant-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-restaurant-gold-500 text-xl">Cargando datos...</p>
+      </div>
+    </div>
+    
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="absolute inset-0 flex items-center justify-center z-20 bg-black bg-opacity-70">
+      <div class="bg-red-900/80 p-6 rounded-lg max-w-md text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <h3 class="text-2xl font-bold text-red-300 mb-2">Error</h3>
+        <p class="text-white text-xl mb-4">{{ errorMessage }}</p>
+        <button (click)="retryLoading()" class="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded transition-colors text-lg">
+          Reintentar
+        </button>
+      </div>
+    </div>
+    
+    <!-- CONTENIDO PRINCIPAL DEL MENÚ -->
+    <div class="w-full h-full p-8 flex flex-col relative z-10">
+      <!-- CABECERA DEL MENÚ -->
+      <div *ngIf="(menuInfo$ | async) as menuInfo" 
+           class="text-center mb-6 animate-pulse-gold">
+        
+        <h1 class="text-6xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient mb-1">
+          Menú del Día
+        </h1>
+        
+        <div *ngIf="menuInfo.fecha" class="text-xl text-gray-400 mb-3">
+          {{ menuInfo.fecha | date:'fullDate':'':'es' }}
+        </div>
+        
+        <div class="h-1 bg-gradient-to-r from-transparent via-restaurant-gold-500 to-transparent w-full my-4"></div>
+        
+        <!-- Precio del menú destacado -->
+        <div class="text-5xl text-transparent bg-clip-text bg-gold-gradient font-bold mb-4">
+          {{ menuInfo.precio | currency:'EUR':'symbol':'1.2-2' }}
+        </div>
+        
+        <!-- Descripción o detalles de lo que incluye el menú -->
+        <div class="max-w-3xl mx-auto text-xl text-gray-300 italic mb-4 border-b border-restaurant-gold-800/30 pb-4">
+          <div *ngIf="menuInfo.descripcion">{{ menuInfo.descripcion }}</div>
+          <div class="mt-2 text-restaurant-gold-400">
+            El menú incluye: pan, bebida y postre a elegir
+          </div>
+        </div>
+      </div>
+      
+      <!-- CONTENIDO DEL MENÚ - PLATOS -->
+      <div class="flex-grow flex items-stretch justify-between gap-8">
+        <!-- PRIMEROS PLATOS -->
+        <div class="flex-1 flex flex-col">
+          <div class="text-center mb-4">
+            <h2 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient inline-block">
+              Primeros
+            </h2>
+            <div class="h-0.5 w-32 bg-gold-gradient mx-auto mt-2"></div>
+          </div>
+          
+          <div class="flex-grow overflow-hidden bg-gradient-to-b from-restaurant-black/70 to-gray-900/70 backdrop-blur-sm rounded-xl p-6 border border-restaurant-gold-800/30">
+            <div *ngIf="primeros.length === 0 && !loading" class="h-full flex items-center justify-center text-gray-500 text-2xl italic">
+              No hay primeros platos disponibles
+            </div>
+            
+            <div *ngFor="let plato of primeros" class="mb-6 last:mb-0 group">
+              <div class="flex flex-col">
+                <h3 class="text-4xl font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300 mb-2">
+                  {{ plato.name }}
+                </h3>
+                <p class="text-xl text-gray-400">
+                  {{ plato.description }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- SEGUNDOS PLATOS -->
+        <div class="flex-1 flex flex-col">
+          <div class="text-center mb-4">
+            <h2 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient inline-block">
+              Segundos
+            </h2>
+            <div class="h-0.5 w-32 bg-gold-gradient mx-auto mt-2"></div>
+          </div>
+          
+          <div class="flex-grow overflow-hidden bg-gradient-to-b from-restaurant-black/70 to-gray-900/70 backdrop-blur-sm rounded-xl p-6 border border-restaurant-gold-800/30">
+            <div *ngIf="segundos.length === 0 && !loading" class="h-full flex items-center justify-center text-gray-500 text-2xl italic">
+              No hay segundos platos disponibles
+            </div>
+            
+            <div *ngFor="let plato of segundos" class="mb-6 last:mb-0 group">
+              <div class="flex flex-col">
+                <h3 class="text-4xl font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300 mb-2">
+                  {{ plato.name }}
+                </h3>
+                <p class="text-xl text-gray-400">
+                  {{ plato.description }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- POSTRES -->
+        <div class="flex-1 flex flex-col">
+          <div class="text-center mb-4">
+            <h2 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient inline-block">
+              Postres
+            </h2>
+            <div class="h-0.5 w-32 bg-gold-gradient mx-auto mt-2"></div>
+          </div>
+          
+          <div class="flex-grow overflow-hidden bg-gradient-to-b from-restaurant-black/70 to-gray-900/70 backdrop-blur-sm rounded-xl p-6 border border-restaurant-gold-800/30">
+            <div *ngIf="postres.length === 0 && !loading" class="h-full flex items-center justify-center text-gray-500 text-2xl italic">
+              No hay postres disponibles
+            </div>
+            
+            <div *ngFor="let plato of postres" class="mb-6 last:mb-0 group">
+              <div class="flex flex-col">
+                <h3 class="text-4xl font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300 mb-2">
+                  {{ plato.name }}
+                </h3>
+                <p class="text-xl text-gray-400">
+                  {{ plato.description }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FOOTER CON INFORMACIÓN ADICIONAL -->
+      <div class="mt-6 text-center text-gray-500">
+        <p class="text-lg">Consulta con nuestro personal sobre alérgenos • El menú del día está disponible de lunes a viernes (no festivos)</p>
+      </div>
+    </div>
+  </div>

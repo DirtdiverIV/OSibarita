@@ -1,9 +1,9 @@
 <!-- src/app/features/vistas/pages/vista-dia/vista-dia.component.html -->
-<div class="w-full h-full bg-restaurant-black text-white p-8 overflow-auto relative">
+<div class="w-full h-full bg-restaurant-black text-white overflow-hidden relative">
   <!-- Fondo elegante con gradiente sutil -->
   <div class="absolute inset-0 opacity-5 mix-blend-overlay bg-gradient-to-br from-gray-900 to-black"></div>
   
-  <!-- Decoración lateral -->
+  <!-- Decoración lateral sutil -->
   <div class="absolute left-0 top-0 w-1 h-full bg-gold-gradient opacity-30"></div>
   <div class="absolute right-0 top-0 w-1 h-full bg-gold-gradient opacity-30"></div>
   
@@ -11,7 +11,7 @@
   <div *ngIf="loading" class="absolute inset-0 flex items-center justify-center z-20 bg-black bg-opacity-70">
     <div class="text-center">
       <div class="w-16 h-16 border-4 border-restaurant-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p class="text-restaurant-gold-500">Cargando datos...</p>
+      <p class="text-restaurant-gold-500 text-xl">Cargando datos...</p>
     </div>
   </div>
   
@@ -21,109 +21,111 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
       </svg>
-      <h3 class="text-xl font-bold text-red-300 mb-2">Error</h3>
-      <p class="text-white mb-4">{{ errorMessage }}</p>
-      <button (click)="retryLoading()" class="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded transition-colors">
+      <h3 class="text-2xl font-bold text-red-300 mb-2">Error</h3>
+      <p class="text-white text-xl mb-4">{{ errorMessage }}</p>
+      <button (click)="retryLoading()" class="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded transition-colors text-lg">
         Reintentar
       </button>
     </div>
   </div>
   
-  <div class="max-w-7xl mx-auto relative z-10">
-    <div class="text-center mb-10">
-      <h1 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient">Nuestras Especialidades</h1>
-      <div class="h-1 w-32 bg-gold-gradient mx-auto mt-2 rounded-full shadow-gold"></div>
-      <p class="text-gray-400 mt-2 italic">Selección especial de nuestro chef</p>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <!-- Menú del día (nuevo formato) -->
-      <app-restaurant-card>
-        <div *ngIf="(menuInfo$ | async) as menuInfo" class="relative">
-          <!-- Cabecera del menú del día -->
-          <div class="text-center mb-6">
-            <h2 class="text-2xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient">Menú del Día</h2>
-            <div *ngIf="menuInfo.fecha" class="text-gray-400 text-sm">
-              {{ menuInfo.fecha | date:'fullDate':'':'es' }}
-            </div>
-            
-            <!-- Precio del menú -->
-            <div class="mt-3 text-2xl text-transparent bg-clip-text bg-gold-gradient font-bold">
-              {{ menuInfo.precio | currency:'EUR':'symbol':'1.2-2' }}
-            </div>
-            
-            <!-- Descripción del menú -->
-            <div *ngIf="menuInfo.descripcion" class="mt-2 text-sm text-gray-400 italic">
-              {{ menuInfo.descripcion }}
-            </div>
-            
-            <!-- Indicador de disponibilidad -->
-            <div *ngIf="menuInfo.disponible" class="mt-3 inline-block px-3 py-1 bg-green-900/30 text-green-400 text-xs rounded-full border border-green-700">
-              Disponible hoy
-            </div>
-            <div *ngIf="!menuInfo.disponible" class="mt-3 inline-block px-3 py-1 bg-red-900/30 text-red-400 text-xs rounded-full border border-red-700">
-              No disponible
+  <div class="w-full h-full p-4 grid grid-cols-3 gap-4 relative z-10">
+    <!-- MENÚ DEL DÍA -->
+    <div class="h-full flex flex-col rounded-lg overflow-hidden shadow-gold animate-pulse-gold border border-restaurant-gold-800 bg-gradient-to-br from-restaurant-black to-gray-900">
+      <div class="bg-gold-gradient h-1.5 w-full"></div>
+      <div class="p-4 flex-grow flex flex-col">
+        <!-- Cabecera del menú del día -->
+        <div class="text-center mb-3">
+          <h2 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient">Menú del Día</h2>
+          <div *ngIf="(menuInfo$ | async)?.precio as precio" class="text-3xl text-transparent bg-clip-text bg-gold-gradient font-bold mt-1">
+            {{ precio | currency:'EUR':'symbol':'1.2-2' }}
+          </div>
+        </div>
+        
+        <!-- Línea decorativa -->
+        <div class="h-px w-full bg-gradient-to-r from-transparent via-restaurant-gold-500/30 to-transparent my-3"></div>
+        
+        <!-- Contenido del menú -->
+        <div class="flex-grow overflow-hidden">
+          <!-- Primeros platos -->
+          <div *ngIf="primeros.length > 0" class="mb-4">
+            <h4 class="text-2xl text-restaurant-gold-400 mb-2 border-b border-restaurant-gold-600/30 pb-1">Primeros</h4>
+            <div *ngFor="let item of primeros" class="py-2 border-b border-gray-800/50 last:border-0">
+              <h5 class="text-xl font-medium text-white">{{ item.name }}</h5>
+              <p class="text-base text-gray-400">{{ item.description }}</p>
             </div>
           </div>
           
-          <!-- Línea decorativa -->
-          <div class="h-px w-full bg-gradient-to-r from-transparent via-restaurant-gold-500/30 to-transparent my-4"></div>
-          
-          <!-- Mensaje si no hay elementos -->
-          <div *ngIf="primeros.length === 0 && segundos.length === 0 && postres.length === 0 && !loading" 
-               class="py-8 text-center text-gray-500">
-            No hay elementos disponibles en el menú del día.
-          </div>
-          
-          <div *ngIf="primeros.length > 0" class="mb-6">
-            <h4 class="text-xl text-restaurant-gold-400 mb-3 border-b border-restaurant-gold-600/30 pb-2">Primeros Platos</h4>
-            <div *ngFor="let item of primeros" class="p-3 border-b border-gray-800/50 hover:bg-restaurant-gold-900/10 transition-all duration-300 group relative">
-              <h5 class="text-lg font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">{{ item.name }}</h5>
-              <p class="text-sm text-gray-400 mt-1">{{ item.description }}</p>
+          <!-- Segundos platos -->
+          <div *ngIf="segundos.length > 0" class="mb-4">
+            <h4 class="text-2xl text-restaurant-gold-400 mb-2 border-b border-restaurant-gold-600/30 pb-1">Segundos</h4>
+            <div *ngFor="let item of segundos" class="py-2 border-b border-gray-800/50 last:border-0">
+              <h5 class="text-xl font-medium text-white">{{ item.name }}</h5>
+              <p class="text-base text-gray-400">{{ item.description }}</p>
             </div>
           </div>
           
-          <div *ngIf="segundos.length > 0" class="mb-6">
-            <h4 class="text-xl text-restaurant-gold-400 mb-3 border-b border-restaurant-gold-600/30 pb-2">Segundos Platos</h4>
-            <div *ngFor="let item of segundos" class="p-3 border-b border-gray-800/50 hover:bg-restaurant-gold-900/10 transition-all duration-300 group relative">
-              <h5 class="text-lg font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">{{ item.name }}</h5>
-              <p class="text-sm text-gray-400 mt-1">{{ item.description }}</p>
-            </div>
-          </div>
-          
+          <!-- Postres -->
           <div *ngIf="postres.length > 0">
-            <h4 class="text-xl text-restaurant-gold-400 mb-3 border-b border-restaurant-gold-600/30 pb-2">Postres</h4>
-            <div *ngFor="let item of postres" class="p-3 border-b border-gray-800/50 hover:bg-restaurant-gold-900/10 transition-all duration-300 group relative">
-              <h5 class="text-lg font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">{{ item.name }}</h5>
-              <p class="text-sm text-gray-400 mt-1">{{ item.description }}</p>
+            <h4 class="text-2xl text-restaurant-gold-400 mb-2 border-b border-restaurant-gold-600/30 pb-1">Postres</h4>
+            <div *ngFor="let item of postres" class="py-2 border-b border-gray-800/50 last:border-0">
+              <h5 class="text-xl font-medium text-white">{{ item.name }}</h5>
+              <p class="text-base text-gray-400">{{ item.description }}</p>
             </div>
           </div>
         </div>
-      </app-restaurant-card>
-      
-      <!-- Tapas y Raciones -->
-      <div class="space-y-8">
-        <!-- Tapas -->
-        <app-restaurant-card title="Tapas">
-          <!-- Mensaje si no hay tapas -->
-          <div *ngIf="(tapas$ | async)?.length === 0 && !loading" 
-               class="py-4 text-center text-gray-500">
+      </div>
+    </div>
+
+    <!-- TAPAS -->
+    <div class="h-full flex flex-col rounded-lg overflow-hidden shadow-gold animate-pulse-gold border border-restaurant-gold-800 bg-gradient-to-br from-restaurant-black to-gray-900">
+      <div class="bg-gold-gradient h-1.5 w-full"></div>
+      <div class="p-4 flex-grow flex flex-col">
+        <h2 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient text-center mb-4">Tapas</h2>
+        <div class="flex-grow overflow-hidden">
+          <div *ngIf="(tapas$ | async)?.length === 0 && !loading" class="py-4 text-center text-gray-500 text-xl">
             No hay tapas disponibles.
           </div>
-          
-          <app-menu-item-card *ngFor="let tapa of (tapas$ | async)" [item]="tapa"></app-menu-item-card>
-        </app-restaurant-card>
-        
-        <!-- Raciones -->
-        <app-restaurant-card title="Raciones">
-          <!-- Mensaje si no hay raciones -->
-          <div *ngIf="(raciones$ | async)?.length === 0 && !loading" 
-               class="py-4 text-center text-gray-500">
+          <div class="space-y-3">
+            <div *ngFor="let tapa of (tapas$ | async)" class="p-3 border-b border-gray-800/50 hover:bg-restaurant-gold-900/10 transition-all duration-300 group relative">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <h3 class="text-2xl font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">{{ tapa.name }}</h3>
+                  <p class="text-base text-gray-400">{{ tapa.description }}</p>
+                </div>
+                <div class="text-transparent bg-clip-text bg-gold-gradient font-bold text-2xl">
+                  {{ tapa.price | number:'1.2-2' }}€
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RACIONES -->
+    <div class="h-full flex flex-col rounded-lg overflow-hidden shadow-gold animate-pulse-gold border border-restaurant-gold-800 bg-gradient-to-br from-restaurant-black to-gray-900">
+      <div class="bg-gold-gradient h-1.5 w-full"></div>
+      <div class="p-4 flex-grow flex flex-col">
+        <h2 class="text-4xl font-montserrat font-bold text-transparent bg-clip-text bg-gold-gradient text-center mb-4">Raciones</h2>
+        <div class="flex-grow overflow-hidden">
+          <div *ngIf="(raciones$ | async)?.length === 0 && !loading" class="py-4 text-center text-gray-500 text-xl">
             No hay raciones disponibles.
           </div>
-          
-          <app-menu-item-card *ngFor="let racion of (raciones$ | async)" [item]="racion"></app-menu-item-card>
-        </app-restaurant-card>
+          <div class="space-y-3">
+            <div *ngFor="let racion of (raciones$ | async)" class="p-3 border-b border-gray-800/50 hover:bg-restaurant-gold-900/10 transition-all duration-300 group relative">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <h3 class="text-2xl font-medium text-white group-hover:text-restaurant-gold-400 transition-colors duration-300">{{ racion.name }}</h3>
+                  <p class="text-base text-gray-400">{{ racion.description }}</p>
+                </div>
+                <div class="text-transparent bg-clip-text bg-gold-gradient font-bold text-2xl">
+                  {{ racion.price | number:'1.2-2' }}€
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
