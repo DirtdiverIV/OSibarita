@@ -1,44 +1,71 @@
 // src/app/core/services/vistas.service.ts
-import { Injectable } from '@angular/core';
-import { FirestoreService } from './firestore.service';
+import { Injectable, OnDestroy } from '@angular/core';
+import { FirebaseOptimizerService } from './firebase-optimizer.service';
 import { Vista, ConfiguracionTV, MenuItem, Escena, MenuDia, MenuDiaItem } from '../../models';
 import { Observable, of } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';
+import { catchError, map, shareReplay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
-export class VistasService {
+export class VistasService implements OnDestroy {
+  // Caché para observables compartidos
+  private cachedObservables: Map<string, Observable<any>> = new Map();
 
-  constructor(private firestoreService: FirestoreService) { }
+  constructor(private firebaseOptimizer: FirebaseOptimizerService) { }
+
+  ngOnDestroy(): void {
+    // Limpiar todas las suscripciones al destruir el servicio
+    this.firebaseOptimizer.cleanupSubscriptions();
+  }
 
   // Obtener todas las vistas
   getVistas(): Observable<Vista[]> {
-    return this.firestoreService.getCollection<Vista>('vistas')
+    const cacheKey = 'vistas';
+    if (this.cachedObservables.has(cacheKey)) {
+      return this.cachedObservables.get(cacheKey) as Observable<Vista[]>;
+    }
+
+    const observable = this.firebaseOptimizer.getCollection<Vista>('vistas')
       .pipe(
-        tap(vistas => console.log('Vistas cargadas:', vistas)),
         catchError(error => {
           console.error('Error al cargar vistas:', error);
           return of([]);
-        })
+        }),
+        shareReplay(1)
       );
+    
+    this.cachedObservables.set(cacheKey, observable);
+    return observable;
   }
 
   // Obtener configuración de una TV específica
   getConfiguracionTV(tvId: string): Observable<ConfiguracionTV> {
-    return this.firestoreService.getDocObservable<ConfiguracionTV>('configuracion', tvId)
+    const cacheKey = `config:${tvId}`;
+    if (this.cachedObservables.has(cacheKey)) {
+      return this.cachedObservables.get(cacheKey) as Observable<ConfiguracionTV>;
+    }
+
+    const observable = this.firebaseOptimizer.getDocument<ConfiguracionTV>('configuracion', tvId)
       .pipe(
-        tap(config => console.log(`Configuración para ${tvId}:`, config)),
+        map(config => config || { 
+          vista: 'dia', 
+          temporizador: 60, // Aumentado a 60 segundos
+          ultimaActualizacion: new Date() 
+        } as ConfiguracionTV),
         catchError(error => {
           console.error(`Error al cargar configuración para ${tvId}:`, error);
-          // Retornar una configuración por defecto en caso de error
           return of({ 
             vista: 'dia', 
-            temporizador: 30, 
+            temporizador: 60, 
             ultimaActualizacion: new Date() 
           } as ConfiguracionTV);
-        })
+        }),
+        shareReplay(1)
       );
+    
+    this.cachedObservables.set(cacheKey, observable);
+    return observable;
   }
 
   // Actualizar configuración de una TV
@@ -48,7 +75,10 @@ export class VistasService {
         ...config,
         ultimaActualizacion: new Date()
       };
-      return this.firestoreService.updateDoc('configuracion', tvId, updatedConfig);
+      await this.firebaseOptimizer.updateDoc('configuracion', tvId, updatedConfig);
+      
+      // Invalidar caché para este TV
+      this.invalidateCache(`config:${tvId}`);
     } catch (error) {
       console.error(`Error al actualizar configuración para ${tvId}:`, error);
       throw error;
@@ -57,40 +87,59 @@ export class VistasService {
 
   // Obtener tapas del día
   getTapas(): Observable<MenuItem[]> {
-    return this.firestoreService.getCollection<MenuItem>('vistas/dia/tapas')
+    const cacheKey = 'tapas';
+    if (this.cachedObservables.has(cacheKey)) {
+      return this.cachedObservables.get(cacheKey) as Observable<MenuItem[]>;
+    }
+
+    const observable = this.firebaseOptimizer.getCollection<MenuItem>('vistas/dia/tapas')
       .pipe(
-        tap(tapas => console.log('Tapas cargadas:', tapas)),
         catchError(error => {
           console.error('Error al cargar tapas:', error);
           return of([]);
-        })
+        }),
+        shareReplay(1)
       );
+    
+    this.cachedObservables.set(cacheKey, observable);
+    return observable;
   }
 
   // Obtener raciones del día
   getRaciones(): Observable<MenuItem[]> {
-    return this.firestoreService.getCollection<MenuItem>('vistas/dia/raciones')
+    const cacheKey = 'raciones';
+    if (this.cachedObservables.has(cacheKey)) {
+      return this.cachedObservables.get(cacheKey) as Observable<MenuItem[]>;
+    }
+
+    const observable = this.firebaseOptimizer.getCollection<MenuItem>('vistas/dia/raciones')
       .pipe(
-        tap(raciones => console.log('Raciones cargadas:', raciones)),
         catchError(error => {
           console.error('Error al cargar raciones:', error);
           return of([]);
-        })
+        }),
+        shareReplay(1)
       );
+    
+    this.cachedObservables.set(cacheKey, observable);
+    return observable;
   }
 
   // Obtener información del menú del día
   getMenuDiaInfo(): Observable<MenuDia> {
-    return this.firestoreService.getDocObservable<MenuDia>('vistas/dia/menu', 'info')
+    const cacheKey = 'menuInfo';
+    if (this.cachedObservables.has(cacheKey)) {
+      return this.cachedObservables.get(cacheKey) as Observable<MenuDia>;
+    }
+
+    const observable = this.firebaseOptimizer.getDocument<MenuDia>('vistas/dia/menu', 'info')
       .pipe(
-        map(info => ({
-          ...info,
-          // Si info.fecha es un Timestamp de Firestore, se convierte a Date
-          fecha: (info.fecha && typeof (info.fecha as any).toDate === 'function')
-            ? (info.fecha as any).toDate()
-            : info.fecha
-        })),
-        tap(info => console.log('Información del menú del día cargada:', info)),
+        map(info => info || {
+          fecha: new Date(),
+          precio: 0,
+          descripcion: 'Información no disponible',
+          disponible: false
+        } as MenuDia),
         catchError(error => {
           console.error('Error al cargar información del menú del día:', error);
           return of({
@@ -99,26 +148,39 @@ export class VistasService {
             descripcion: 'Información no disponible',
             disponible: false
           } as MenuDia);
-        })
+        }),
+        shareReplay(1)
       );
+    
+    this.cachedObservables.set(cacheKey, observable);
+    return observable;
   }
   
   // Obtener platos del menú del día
   getMenuDiaPlatos(): Observable<MenuDiaItem[]> {
-    return this.firestoreService.getCollection<MenuDiaItem>('vistas/dia/platos')
+    const cacheKey = 'menuPlatos';
+    if (this.cachedObservables.has(cacheKey)) {
+      return this.cachedObservables.get(cacheKey) as Observable<MenuDiaItem[]>;
+    }
+
+    const observable = this.firebaseOptimizer.getCollection<MenuDiaItem>('vistas/dia/platos')
       .pipe(
-        tap(platos => console.log('Platos del menú del día cargados:', platos)),
         catchError(error => {
           console.error('Error al cargar platos del menú del día:', error);
           return of([]);
-        })
+        }),
+        shareReplay(1)
       );
+    
+    this.cachedObservables.set(cacheKey, observable);
+    return observable;
   }
   
   // Actualizar información del menú del día
   async updateMenuDiaInfo(data: Partial<MenuDia>): Promise<void> {
     try {
-      return this.firestoreService.updateDoc('vistas/dia/menu', 'info', data);
+      await this.firebaseOptimizer.updateDoc('vistas/dia/menu', 'info', data);
+      this.invalidateCache('menuInfo');
     } catch (error) {
       console.error('Error al actualizar información del menú del día:', error);
       throw error;
@@ -128,7 +190,9 @@ export class VistasService {
   // Agregar un plato al menú del día
   async addMenuDiaPlato(plato: MenuDiaItem): Promise<string> {
     try {
-      return this.firestoreService.addDoc('vistas/dia/platos', plato);
+      const id = await this.firebaseOptimizer.addDoc('vistas/dia/platos', plato);
+      this.invalidateCache('menuPlatos');
+      return id;
     } catch (error) {
       console.error('Error al agregar plato al menú del día:', error);
       throw error;
@@ -138,7 +202,8 @@ export class VistasService {
   // Actualizar un plato del menú del día
   async updateMenuDiaPlato(id: string, data: Partial<MenuDiaItem>): Promise<void> {
     try {
-      return this.firestoreService.updateDoc('vistas/dia/platos', id, data);
+      await this.firebaseOptimizer.updateDoc('vistas/dia/platos', id, data);
+      this.invalidateCache('menuPlatos');
     } catch (error) {
       console.error('Error al actualizar plato del menú del día:', error);
       throw error;
@@ -148,7 +213,8 @@ export class VistasService {
   // Eliminar un plato del menú del día
   async deleteMenuDiaPlato(id: string): Promise<void> {
     try {
-      return this.firestoreService.deleteDoc('vistas/dia/platos', id);
+      await this.firebaseOptimizer.deleteDoc('vistas/dia/platos', id);
+      this.invalidateCache('menuPlatos');
     } catch (error) {
       console.error('Error al eliminar plato del menú del día:', error);
       throw error;
@@ -157,32 +223,49 @@ export class VistasService {
 
   // Obtener escenas de eventos
   getEscenasEventos(): Observable<Escena[]> {
-    return this.firestoreService.getCollection<Escena>('vistas/eventos/escenas')
+    const cacheKey = 'escenasEventos';
+    if (this.cachedObservables.has(cacheKey)) {
+      return this.cachedObservables.get(cacheKey) as Observable<Escena[]>;
+    }
+
+    const observable = this.firebaseOptimizer.getCollection<Escena>('vistas/eventos/escenas')
       .pipe(
-        tap(escenas => console.log('Escenas de eventos cargadas:', escenas)),
         catchError(error => {
           console.error('Error al cargar escenas de eventos:', error);
           return of([]);
-        })
+        }),
+        shareReplay(1)
       );
+    
+    this.cachedObservables.set(cacheKey, observable);
+    return observable;
   }
 
   // Obtener escenas de carta
   getEscenasCarta(): Observable<Escena[]> {
-    return this.firestoreService.getCollection<Escena>('vistas/carta/escenas')
+    const cacheKey = 'escenasCarta';
+    if (this.cachedObservables.has(cacheKey)) {
+      return this.cachedObservables.get(cacheKey) as Observable<Escena[]>;
+    }
+
+    const observable = this.firebaseOptimizer.getCollection<Escena>('vistas/carta/escenas')
       .pipe(
-        tap(escenas => console.log('Escenas de carta cargadas:', escenas)),
         catchError(error => {
           console.error('Error al cargar escenas de carta:', error);
           return of([]);
-        })
+        }),
+        shareReplay(1)
       );
+    
+    this.cachedObservables.set(cacheKey, observable);
+    return observable;
   }
 
   // Actualizar un ítem del menú
   async updateMenuItem(categoria: string, id: string, data: Partial<MenuItem>): Promise<void> {
     try {
-      return this.firestoreService.updateDoc(`vistas/dia/${categoria}`, id, data);
+      await this.firebaseOptimizer.updateDoc(`vistas/dia/${categoria}`, id, data);
+      this.invalidateCache(categoria === 'tapas' ? 'tapas' : 'raciones');
     } catch (error) {
       console.error(`Error al actualizar item del menú (${categoria}/${id}):`, error);
       throw error;
@@ -192,7 +275,9 @@ export class VistasService {
   // Agregar un ítem al menú
   async addMenuItem(categoria: string, item: MenuItem): Promise<string> {
     try {
-      return this.firestoreService.addDoc(`vistas/dia/${categoria}`, item);
+      const id = await this.firebaseOptimizer.addDoc(`vistas/dia/${categoria}`, item);
+      this.invalidateCache(categoria === 'tapas' ? 'tapas' : 'raciones');
+      return id;
     } catch (error) {
       console.error(`Error al agregar item al menú (${categoria}):`, error);
       throw error;
@@ -202,7 +287,8 @@ export class VistasService {
   // Eliminar un ítem del menú
   async deleteMenuItem(categoria: string, id: string): Promise<void> {
     try {
-      return this.firestoreService.deleteDoc(`vistas/dia/${categoria}`, id);
+      await this.firebaseOptimizer.deleteDoc(`vistas/dia/${categoria}`, id);
+      this.invalidateCache(categoria === 'tapas' ? 'tapas' : 'raciones');
     } catch (error) {
       console.error(`Error al eliminar item del menú (${categoria}/${id}):`, error);
       throw error;
@@ -212,7 +298,8 @@ export class VistasService {
   // Actualizar una escena
   async updateEscena(tipo: 'eventos' | 'carta', id: string, data: Partial<Escena>): Promise<void> {
     try {
-      return this.firestoreService.updateDoc(`vistas/${tipo}/escenas`, id, data);
+      await this.firebaseOptimizer.updateDoc(`vistas/${tipo}/escenas`, id, data);
+      this.invalidateCache(tipo === 'eventos' ? 'escenasEventos' : 'escenasCarta');
     } catch (error) {
       console.error(`Error al actualizar escena (${tipo}/${id}):`, error);
       throw error;
@@ -222,7 +309,9 @@ export class VistasService {
   // Agregar una escena
   async addEscena(tipo: 'eventos' | 'carta', escena: Escena): Promise<string> {
     try {
-      return this.firestoreService.addDoc(`vistas/${tipo}/escenas`, escena);
+      const id = await this.firebaseOptimizer.addDoc(`vistas/${tipo}/escenas`, escena);
+      this.invalidateCache(tipo === 'eventos' ? 'escenasEventos' : 'escenasCarta');
+      return id;
     } catch (error) {
       console.error(`Error al agregar escena (${tipo}):`, error);
       throw error;
@@ -232,7 +321,8 @@ export class VistasService {
   // Eliminar una escena
   async deleteEscena(tipo: 'eventos' | 'carta', id: string): Promise<void> {
     try {
-      return this.firestoreService.deleteDoc(`vistas/${tipo}/escenas`, id);
+      await this.firebaseOptimizer.deleteDoc(`vistas/${tipo}/escenas`, id);
+      this.invalidateCache(tipo === 'eventos' ? 'escenasEventos' : 'escenasCarta');
     } catch (error) {
       console.error(`Error al eliminar escena (${tipo}/${id}):`, error);
       throw error;
@@ -248,9 +338,15 @@ export class VistasService {
           await this.updateEscena(tipo, escena.id, { orden: i + 1 });
         }
       }
+      this.invalidateCache(tipo === 'eventos' ? 'escenasEventos' : 'escenasCarta');
     } catch (error) {
       console.error(`Error al reordenar escenas (${tipo}):`, error);
       throw error;
     }
+  }
+
+  // Invalidar caché específica para forzar una recarga
+  private invalidateCache(cacheKey: string): void {
+    this.cachedObservables.delete(cacheKey);
   }
 }
